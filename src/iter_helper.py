@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-"""Iteration helper for the Seguranca Presente workflow (renamed).
-
-Same behavior as the original script; renamed to reflect primary function.
-"""
 from __future__ import annotations
-
 import json
 import re
 import sys

@@ -210,7 +210,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--workers", type=int, default=1, help="parallel API calls")
     args = parser.parse_args(argv[1:])
 
-    data, raw, src = load_data_for_classification()
+    data, raw = load_data_for_classification()[:2]
     arts = []
     try:
         from iter_helper import article_records  # type: ignore

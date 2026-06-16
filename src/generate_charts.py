@@ -1,15 +1,9 @@
-#!/usr/bin/env python3
-"""Generate summary CSVs and charts from article-level LLM labels."""
 from __future__ import annotations
-
 import argparse
 from pathlib import Path
-
 import matplotlib.pyplot as plt
 import pandas as pd
-
 from config import GRAPHS_DIR, SENTIMENT_ORDER, TABLES_DIR
-
 
 PALETTE = {
     "muito negativo": "#8b1e3f",
@@ -17,8 +11,7 @@ PALETTE = {
     "neutro": "#7f8c8d",
     "positivo": "#2a9d8f",
     "muito positivo": "#1d6f42",
-    "n/a": "#c8c8c8",
-}
+    "n/a": "#c8c8c8",}
 
 
 def load_labels(path: Path) -> pd.DataFrame:
@@ -33,6 +26,15 @@ def load_labels(path: Path) -> pd.DataFrame:
     df["date"] = df["publishedAt"].dt.date
     df["month"] = df["publishedAt"].dt.to_period("M").astype(str)
     df["confidence"] = pd.to_numeric(df.get("confidence"), errors="coerce")
+    if "articleId" in df.columns:
+        df["articleId"] = pd.to_numeric(df["articleId"], errors="coerce")
+        df = (
+            df.dropna(subset=["articleId"])
+            .sort_values(["articleId", "publishedAt", "recordKey"])
+            .drop_duplicates(subset=["articleId"], keep="first")
+            .sort_values(["publishedAt", "articleId"])
+            .reset_index(drop=True)
+        )
     return df
 
 
