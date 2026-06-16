@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 
-from config import ANALISE, DATA_PATHS, EXPECTED_SITE_STORIES, ROOT, TARGET_KEYS, TEXT_PHRASES
+from src.configuracoes.config import ANALISE, DATA_PATHS, EXPECTED_SITE_STORIES, ROOT, TARGET_KEYS, TEXT_PHRASES
 
 
 def ascii_fold(text: str) -> str:
@@ -28,7 +28,7 @@ def load_data() -> tuple[dict, dict, Path]:
                     raw = json.load(f)
             return data, raw, data_path
     raise SystemExit(
-        "No article data found. Expected src/seguranca_presente_artigos.json "
+        "No article data found. Expected src/dados_entrada/seguranca_presente_artigos.json "
         "or snapshots under database/."
     )
 
@@ -344,8 +344,7 @@ def main(argv: list[str]) -> int:
         return cmd_todo(data, raw)
     if cmd == "classify":
         # Invoke the external LLM helper script to avoid circular imports.
-        script = ROOT / "src" / "llm_classifier.py"
-        proc = subprocess.run([sys.executable, str(script)] + argv[2:])
+        proc = subprocess.run([sys.executable, "-m", "src.pipeline.classificar_noticias"] + argv[2:], cwd=ROOT)
         return proc.returncode
     if cmd == "template" and len(argv) >= 3:
         return cmd_template(data, raw, argv[2])

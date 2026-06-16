@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
-from config import GRAPHS_DIR, SENTIMENT_ORDER, TABLES_DIR
+from src.configuracoes.config import GRAPHS_DIR, SENTIMENT_ORDER, TABLES_DIR
 
 PALETTE = {
     "muito negativo": "#8b1e3f",
@@ -25,7 +25,22 @@ def load_labels(path: Path) -> pd.DataFrame:
     df["publishedAt"] = pd.to_datetime(df.get("publishedAt"), errors="coerce", utc=True)
     df["date"] = df["publishedAt"].dt.date
     df["month"] = df["publishedAt"].dt.to_period("M").astype(str)
-    df["confidence"] = pd.to_numeric(df.get("confidence"), errors="coerce")
+    if "confidence" in df.columns:
+        df["confidence"] = pd.to_numeric(df["confidence"], errors="coerce")
+    else:
+        df["confidence"] = pd.NA
+    if "grau_ambiguidade" in df.columns:
+        df["grau_ambiguidade"] = (
+            df["grau_ambiguidade"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .str.replace("médio", "medio", regex=False)
+        )
+        df.loc[~df["grau_ambiguidade"].isin(["baixo", "medio", "alto"]), "grau_ambiguidade"] = ""
+    else:
+        df["grau_ambiguidade"] = ""
     if "articleId" in df.columns:
         df["articleId"] = pd.to_numeric(df["articleId"], errors="coerce")
         df = (
@@ -115,6 +130,8 @@ def bar_counts(counts: pd.DataFrame, graphs_dir: Path) -> None:
 
 def confidence_histogram(df: pd.DataFrame, graphs_dir: Path) -> None:
     valid = df.dropna(subset=["confidence"])
+    if valid.empty:
+        return
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.hist(valid["confidence"], bins=20, color="#457b9d", edgecolor="white")
     ax.set_title("Histograma de confianca da classificacao")
@@ -122,6 +139,27 @@ def confidence_histogram(df: pd.DataFrame, graphs_dir: Path) -> None:
     ax.set_ylabel("Noticias")
     fig.tight_layout()
     fig.savefig(graphs_dir / "histograma_confianca.png", dpi=180)
+    plt.close(fig)
+
+
+def ambiguity_chart(df: pd.DataFrame, graphs_dir: Path, tables_dir: Path) -> None:
+    valid = df[df["grau_ambiguidade"].isin(["baixo", "medio", "alto"])]
+    if valid.empty:
+        return
+    order = ["baixo", "medio", "alto"]
+    counts = valid["grau_ambiguidade"].value_counts().reindex(order, fill_value=0)
+    counts.rename_axis("grau_ambiguidade").reset_index(name="n_articles").to_csv(
+        tables_dir / "ambiguity_counts.csv",
+        index=False,
+        encoding="utf-8-sig",
+    )
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.bar(order, counts.values, color=["#2a9d8f", "#e9c46a", "#e76f51"])
+    ax.set_title("Grau de ambiguidade da classificacao")
+    ax.set_xlabel("Grau de ambiguidade")
+    ax.set_ylabel("Noticias")
+    fig.tight_layout()
+    fig.savefig(graphs_dir / "barras_grau_ambiguidade.png", dpi=180)
     plt.close(fig)
 
 
@@ -189,6 +227,7 @@ def main() -> int:
     stacked_area(monthly_pct, args.graphs_dir)
     bar_counts(counts, args.graphs_dir)
     confidence_histogram(df, args.graphs_dir)
+    ambiguity_chart(df, args.graphs_dir, args.tables_dir)
     score_histogram(df, args.graphs_dir)
     volume_line(df, args.graphs_dir)
     source_chart(df, args.graphs_dir, args.tables_dir)

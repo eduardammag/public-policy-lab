@@ -10,13 +10,14 @@ import argparse
 import csv
 import json
 import os
+import re
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional
 
-from config import SENTIMENT_ORDER, TABLES_DIR
+from src.configuracoes.config import SENTIMENT_ORDER, TABLES_DIR
 
 try:
     from dotenv import load_dotenv
@@ -30,6 +31,7 @@ except Exception:
 
 # default model (tunable via OPENAI_MODEL env var)
 DEFAULT_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "prompt_classificacao.txt"
 OUTPUT_FIELDS = [
     "recordKey",
     "jsonIndex",
@@ -45,8 +47,18 @@ OUTPUT_FIELDS = [
     "targetKeys",
     "label",
     "sentiment_score",
-    "confidence",
+    "grau_ambiguidade",
     "reason",
+    "evidencia_sentimento",
+    "evento",
+    "evento_chave",
+    "evento_id",
+    "tipo_evento",
+    "local",
+    "data_evento",
+    "descricao_curta",
+    "evidencia_evento",
+    "event_confidence",
     "model",
 ]
 
@@ -60,6 +72,22 @@ SCORE_MAP = {
 }
 
 
+def slugify(text: str) -> str:
+    text = str(text or "").strip().lower()
+    replacements = {
+        "á": "a", "à": "a", "ã": "a", "â": "a",
+        "é": "e", "ê": "e",
+        "í": "i",
+        "ó": "o", "ô": "o", "õ": "o",
+        "ú": "u",
+        "ç": "c",
+    }
+    for src, dst in replacements.items():
+        text = text.replace(src, dst)
+    text = re.sub(r"[^a-z0-9]+", "-", text).strip("-")
+    return re.sub(r"-+", "-", text) or "evento-sem-chave"
+
+
 def ensure_openai_available() -> None:
     if load_dotenv:
         load_dotenv()
@@ -69,6 +97,13 @@ def ensure_openai_available() -> None:
     if not key:
         raise SystemExit("OpenAI API key not found in environment (OPENAI_API_KEY)")
     os.environ["OPENAI_API_KEY"] = key
+
+
+def load_prompt_template() -> str:
+    try:
+        return PROMPT_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        raise SystemExit(f"Prompt file not found: {PROMPT_PATH}")
 
 
 def normalize_label(label: str | None) -> str:
@@ -93,16 +128,18 @@ def normalize_label(label: str | None) -> str:
     return "n/a"
 
 
+def normalize_ambiguity(value: str | None) -> str:
+    value = (value or "").strip().lower()
+    value = value.replace("médio", "medio")
+    if value in {"baixo", "medio", "alto"}:
+        return value
+    return "alto"
+
+
 def classify_text(text: str, model: str = DEFAULT_MODEL, retries: int = 3) -> dict:
     ensure_openai_available()
-    prompt = (
-        "Classifique a percepcao publica retratada pela noticia sobre o programa "
-        "Seguranca Presente. Use exatamente um dos rotulos: muito negativo, "
-        "negativo, neutro, positivo, muito positivo, n/a. Use n/a somente quando "
-        "a noticia nao permitir avaliar o programa/politica. Responda somente em "
-        "JSON com os campos: label, confidence (0 a 1), reason.\n\n"
-        "Noticia:\n" + text[:10000]
-    )
+    template = load_prompt_template()
+    prompt = template.replace("{noticia}", text[:10000])
     last_error = None
     for attempt in range(1, retries + 1):
         try:
@@ -112,12 +149,15 @@ def classify_text(text: str, model: str = DEFAULT_MODEL, retries: int = 3) -> di
                 messages=[
                     {
                         "role": "system",
-                        "content": "Voce e um classificador rigoroso de noticias em portugues brasileiro.",
+                        "content": (
+                            "Voce classifica sentimento e extrai eventos jornalisticos "
+                            "especificos em portugues brasileiro."
+                        ),
                     },
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0,
-                max_tokens=220,
+                max_tokens=520,
                 response_format={"type": "json_object"},
             )
             content = (resp.choices[0].message.content or "").strip()
@@ -125,7 +165,7 @@ def classify_text(text: str, model: str = DEFAULT_MODEL, retries: int = 3) -> di
         except Exception as e:
             last_error = e
             if attempt == retries:
-                return {"label": "n/a", "confidence": 0.0, "reason": f"API error: {e}"}
+                return {"label": "n/a", "grau_ambiguidade": "alto", "reason": f"API error: {e}"}
             time.sleep(2 * attempt)
 
     try:
@@ -133,16 +173,16 @@ def classify_text(text: str, model: str = DEFAULT_MODEL, retries: int = 3) -> di
         parsed["label"] = normalize_label(parsed.get("label"))
         return parsed
     except Exception:
-        return {"label": "n/a", "confidence": 0.0, "reason": content or str(last_error or "")}
+        return {"label": "n/a", "grau_ambiguidade": "alto", "reason": content or str(last_error or "")}
 
 
 def load_data_for_classification() -> tuple[dict, dict, Path]:
     try:
-        from iter_helper import load_data  # type: ignore
+        from src.utilitarios.dados_noticias import load_data
 
         return load_data()
     except Exception:
-        raise SystemExit("Cannot import data loader from iter_helper.py")
+        raise SystemExit("Cannot import data loader from src/utilitarios/dados_noticias.py")
 
 
 def find_article_by_aid(arts: list[dict], aid: str) -> Optional[dict]:
@@ -173,11 +213,14 @@ def write_labels_csv(rows: list[dict], outpath: Path) -> None:
 
 def article_to_row(rec: dict, out: dict, model: str) -> dict:
     label = normalize_label(out.get("label"))
-    confidence = out.get("confidence", 0)
+    grau_ambiguidade = normalize_ambiguity(out.get("grau_ambiguidade"))
+    event_confidence = out.get("event_confidence", "")
     try:
-        confidence = round(float(confidence), 4)
+        event_confidence = round(float(event_confidence), 4)
     except Exception:
-        confidence = 0.0
+        event_confidence = ""
+    event_name = str(out.get("evento") or out.get("evento_chave") or "").strip()
+    event_key = str(out.get("evento_chave") or event_name or "").strip()
     return {
         "recordKey": rec.get("recordKey") or rec["id"],
         "jsonIndex": rec.get("jsonIndex", ""),
@@ -193,8 +236,18 @@ def article_to_row(rec: dict, out: dict, model: str) -> dict:
         "targetKeys": "; ".join(rec.get("targetKeys") or []),
         "label": label,
         "sentiment_score": SCORE_MAP[label],
-        "confidence": confidence,
+        "grau_ambiguidade": grau_ambiguidade,
         "reason": str(out.get("reason", ""))[:1200],
+        "evidencia_sentimento": str(out.get("evidencia_sentimento", ""))[:1200],
+        "evento": event_name,
+        "evento_chave": event_key,
+        "evento_id": slugify(event_key),
+        "tipo_evento": str(out.get("tipo_evento", ""))[:200],
+        "local": str(out.get("local", ""))[:200],
+        "data_evento": str(out.get("data_evento", ""))[:100],
+        "descricao_curta": str(out.get("descricao_curta", ""))[:1200],
+        "evidencia_evento": str(out.get("evidencia_evento", ""))[:1200],
+        "event_confidence": event_confidence,
         "model": model,
     }
 
@@ -213,11 +266,11 @@ def main(argv: list[str]) -> int:
     data, raw = load_data_for_classification()[:2]
     arts = []
     try:
-        from iter_helper import article_records  # type: ignore
+        from src.utilitarios.dados_noticias import article_records
 
         arts = article_records(data, raw)
     except Exception:
-        raise SystemExit("Cannot import article_records from iter_helper.py")
+        raise SystemExit("Cannot import article_records from src/utilitarios/dados_noticias.py")
 
     if args.aid:
         rec = find_article_by_aid(arts, args.aid)
@@ -238,7 +291,7 @@ def main(argv: list[str]) -> int:
     pending = []
     for rec in candidates:
         key = rec.get("recordKey") or rec["id"]
-        if key in rows_by_key and rows_by_key[key].get("label"):
+        if key in rows_by_key and rows_by_key[key].get("label") and rows_by_key[key].get("evento_chave"):
             print(f"skip existing {key}", file=sys.stderr)
             continue
         pending.append(rec)
