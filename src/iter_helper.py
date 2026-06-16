@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 
-from config import ANALISE, DATA_PATHS, EXPECTED_SITE_STORIES, TARGET_KEYS, TEXT_PHRASES
+from config import ANALISE, DATA_PATHS, EXPECTED_SITE_STORIES, ROOT, TARGET_KEYS, TEXT_PHRASES
 
 
 def ascii_fold(text: str) -> str:
@@ -29,17 +29,31 @@ def load_data() -> tuple[dict, dict, Path]:
             with data_path.open(encoding="utf-8") as f:
                 data = json.load(f)
             raw = {}
-            if raw_path.exists():
+            if raw_path and raw_path.exists():
                 with raw_path.open(encoding="utf-8") as f:
                     raw = json.load(f)
             return data, raw, data_path
     raise SystemExit(
-        "No clipping-data snapshot found. Add files under "
-        "seguranca-presente/database/ or use the repository assets/ snapshot."
+        "No article data found. Expected src/seguranca_presente_artigos.json "
+        "or snapshots under database/."
     )
 
 
 def selection_stats(data: dict, raw: dict) -> dict[str, int]:
+    if "articles" in data and "stories" not in data:
+        articles = data.get("articles", []) or []
+        article_ids = {int(a.get("articleId") or 0) for a in articles if a.get("articleId")}
+        return {
+            "site_stories": len({int(a.get("storyId") or 0) for a in articles if a.get("storyId")}),
+            "strict_articles": len(articles),
+            "unique_article_ids": len(article_ids),
+            "duplicate_article_rows": len(articles) - len(article_ids),
+            "story_inherited_articles": len(articles),
+            "text_phrase_articles": len(articles),
+            "strict_or_text_articles": len(articles),
+            "broad_articles": len(articles),
+        }
+
     folded_phrases = {ascii_fold(p) for p in TEXT_PHRASES}
     site_story_ids: set[int] = set()
     story_inherited_article_ids: set[int] = set()
@@ -86,6 +100,42 @@ def selection_stats(data: dict, raw: dict) -> dict[str, int]:
 
 def article_records(data: dict, raw: dict) -> list[dict]:
     """Return one record per strict individual article for Seguranca Presente."""
+    if "articles" in data and "stories" not in data:
+        out: list[dict] = []
+        seen_ids: dict[str, int] = {}
+        for idx, art in enumerate(data.get("articles") or [], 1):
+            aid = int(art.get("articleId") or 0)
+            if not aid:
+                continue
+            original_id = art.get("id") or f"a-{aid}"
+            seen_ids[original_id] = seen_ids.get(original_id, 0) + 1
+            record_key = original_id if seen_ids[original_id] == 1 else f"{original_id}__dup{seen_ids[original_id]}"
+            article_keys = set(art.get("targetKeys") or [])
+            out.append({
+                "recordKey": record_key,
+                "jsonIndex": idx,
+                "id": original_id,
+                "articleId": aid,
+                "title": art.get("title") or "",
+                "url": art.get("url") or "",
+                "sourceName": art.get("sourceName") or "",
+                "sourceHost": art.get("sourceHost") or "",
+                "publishedAt": art.get("publishedAt") or "",
+                "publishedDisplay": art.get("publishedDisplay") or "",
+                "rawTextKey": art.get("rawTextKey") or "",
+                "rawText": art.get("rawText") or "",
+                "summaryPreview": art.get("summaryPreview") or "",
+                "summaryLabel": art.get("summaryLabel") or "",
+                "targetKeys": sorted(article_keys),
+                "storyTitle": art.get("storyTitle") or "",
+                "storyId": art.get("storyId"),
+                "storyTargetKeys": [],
+                "storyInScope": True,
+                "articleInScope": True,
+                "mentionOnlyInText": False,
+            })
+        return sorted(out, key=lambda r: (r["publishedAt"], r["articleId"], r["jsonIndex"]))
+
     out: dict[int, dict] = {}
     folded_phrases = {ascii_fold(p) for p in TEXT_PHRASES}
 
@@ -284,7 +334,11 @@ def main(argv: list[str]) -> int:
 
     data, raw, src = load_data()
     generated = (data.get("meta") or {}).get("generatedAt")
-    print(f"# data source: {src.relative_to(ROOT)} (generated {generated})", file=sys.stderr)
+    try:
+        src_display = src.relative_to(ROOT)
+    except ValueError:
+        src_display = src
+    print(f"# data source: {src_display} (generated {generated})", file=sys.stderr)
 
     if cmd == "list":
         return cmd_list(data, raw)
@@ -296,7 +350,7 @@ def main(argv: list[str]) -> int:
         return cmd_todo(data, raw)
     if cmd == "classify":
         # Invoke the external LLM helper script to avoid circular imports.
-        script = ROOT / "seguranca-presente" / "tools" / "llm_classifier.py"
+        script = ROOT / "src" / "llm_classifier.py"
         proc = subprocess.run([sys.executable, str(script)] + argv[2:])
         return proc.returncode
     if cmd == "template" and len(argv) >= 3:

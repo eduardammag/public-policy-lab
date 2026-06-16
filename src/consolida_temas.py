@@ -12,6 +12,7 @@ import re
 import sys
 import unicodedata
 from collections import Counter, defaultdict
+from pathlib import Path
 
 from config import ALIAS_PATH, ANALISE, CONSOLIDA, TABLES_DIR, SENTIMENT_ORDER
 
