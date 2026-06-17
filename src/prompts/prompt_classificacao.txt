@@ -13,6 +13,9 @@ ou a eventos diretamente relacionados.
 2. Identificar o evento factual central ou a pauta concreta mais importante da notícia.
 3. Produzir uma chave canônica estável para agrupar notícias que tratam do mesmo 
 evento ou pauta factual.
+4. Produzir `evento_chave` de modo que o ranking posterior possa ser feito apenas
+pela agregação dessa chave, sem correções heurísticas, similaridade textual ou
+agrupamento manual depois da classificação.
 
 Regras gerais:
 
@@ -62,6 +65,34 @@ Tema/evento principal:
 * Inclua local, pessoa, instituição e ano quando isso ajudar a distinguir o evento.
 * Se o evento for recorrente, como Réveillon, Carnaval, Rock in Rio ou show anual, inclua o ano quando disponível.
 
+Regras obrigatórias para ranking por evento:
+
+* O ranking posterior será feito exclusivamente por `evento_chave`.
+* Portanto, `evento_chave` deve ser a chave de agrupamento final do mesmo acontecimento factual.
+* Não crie uma chave diferente apenas porque a notícia enfatiza um aspecto diferente do mesmo evento.
+* Se várias notícias falam do mesmo show, operação, auditoria, denúncia, transferência, inauguração, concurso, decisão ou episódio, use a mesma `evento_chave`.
+* A chave deve representar o acontecimento principal, não o recorte jornalístico da manchete.
+* Antes de definir `evento_chave`, pergunte: "outra notícia sobre o mesmo acontecimento, mas com outro ângulo, deveria cair no mesmo ranking?" Se sim, use uma chave mais ampla e estável.
+* Remova da chave detalhes de ângulo jornalístico, como `"critica"`, `"elogio"`, `"reacao"`, `"balanco"`, `"queda"`, `"falha"`, `"uso-de-tecnologia"`, `"reforco"`, `"esquema"`, `"orientacao"`, `"acusacao"` ou `"desdobramento"`, quando esses termos forem apenas facetas do mesmo evento-mãe.
+* Mantenha na chave apenas os elementos que distinguem o acontecimento de outros: pessoa ou artista, local, instituição, decisão central, caso policial, operação, denúncia central e ano.
+* Para o campo `evento`, use uma descrição humana do evento-mãe, não uma paráfrase específica da manchete.
+* Para eventos públicos/culturais, agrupe sob o evento-mãe: notícias sobre esquema de segurança, queda de ocorrências, falha de pórticos, uso de tecnologia, orientação ao público ou balanço operacional do mesmo show devem usar a mesma `evento_chave`.
+* Para auditorias, denúncias ou escândalos, agrupe sob a irregularidade central: notícias sobre escalas fantasmas, metas fraudadas e resultados da mesma auditoria devem usar a mesma `evento_chave`.
+* Para decisões administrativas, agrupe sob a decisão central: notícias favoráveis, críticas, reações políticas e explicações sobre a mesma transferência, nomeação ou mudança institucional devem usar a mesma `evento_chave`.
+* Para inaugurações/expansões, não agrupe bases de locais diferentes. Uma base em Búzios, uma base em Irajá e uma base em Nova Iguaçu são eventos diferentes, mesmo que todas sejam inaugurações do Segurança Presente.
+* Para prisões/apreensões, só agrupe se for o mesmo caso policial. Prisões diferentes no mesmo bairro não devem compartilhar chave.
+* Para crimes/violência, só agrupe se forem o mesmo episódio, vítima, local e contexto factual. Crimes diferentes na mesma cidade não devem compartilhar chave.
+* Para mortes, desaparecimentos ou pessoas baleadas, se as notícias mencionam a mesma vítima ou o mesmo episódio, use a mesma chave mesmo que uma manchete destaque busca, enterro, prisão, investigação, reação política ou balanço.
+* Para críticas de gestão, se várias notícias discutem a mesma crise, auditoria, decisão, denúncia ou fala pública, agrupe sob esse fato central; não crie uma chave para cada colunista, reação ou frase.
+* Para operações policiais ou de segurança, use a mesma chave para planejamento, execução e balanço quando forem fases do mesmo evento operacional.
+* A `evento_chave` deve ser robusta para ranking: curta, repetível, sem detalhe acidental, mas com nomes próprios, local e ano quando necessário.
+
+Nível correto de granularidade:
+
+* Muito amplo, errado: `"violencia-copacabana-2026"`, `"criticas-seguranca-publica"`, `"inauguracao-seguranca-presente"`.
+* Muito estreito, errado: `"paes-chama-transferencia-de-golaco"`, `"porticos-show-shakira-nao-funcionam"`, `"familia-busca-informacoes-simonin"`.
+* Correto: `"show-shakira-copacabana-2026"`, `"transferencia-seguranca-presente-policia-militar-2026"`, `"desaparecimento-jose-carlos-simonin-copacabana-2026"`.
+
 Exemplos de bons eventos/temas:
 
 * `"Show da Shakira em Copacabana"`
@@ -88,6 +119,14 @@ Exemplos de padronização:
 * `"transferencia-do-seguranca-presente-para-a-policia-militar"` e `"transferencia-do-seguranca-presente-para-a-policia-militar-2026"` devem ser tratados como o mesmo evento se a notícia se referir à mesma decisão factual.
 * `"inauguracao-base-seguranca-presente-iraja-2025"` e `"inauguracao-base-seguranca-presente-nova-iguacu"` devem ser tratados como eventos diferentes.
 * `"show-lady-gaga-copacabana-2025"` e `"show-shakira-copacabana-2026"` devem ser tratados como eventos diferentes.
+* Notícias como `"Show de Shakira terá 8 mil agentes"`, `"Pórticos com detectores de metal para o show da Shakira não funcionam"`, `"Estado aponta queda de ocorrências em show de Shakira"` e `"Contratação de IA para o show da Shakira"` devem usar a mesma chave: `"show-shakira-copacabana-2026"`.
+* Notícias como `"Show de Lady Gaga recebe esquema especial"`, `"PM revista público nos acessos"` e `"Fãs aprovam esquema no show de Lady Gaga"` devem usar a mesma chave: `"show-lady-gaga-copacabana-2025"`.
+* Notícias sobre `"auditorias apontam escalas fantasmas"`, `"fraudes no cumprimento de metas"` e `"primeiros resultados das auditorias"` devem usar a mesma chave se forem a mesma auditoria: `"auditorias-irregularidades-seguranca-presente-2026"`.
+* Notícias sobre `"transferência do Segurança Presente para a PM"`, `"Paes elogia transferência"` e `"críticas à transferência"` devem usar a mesma chave: `"transferencia-seguranca-presente-policia-militar-2026"`.
+* Notícias sobre `"José Carlos Simonin está desaparecido"`, `"família busca ex-subsecretário"` e `"pai de acusado em estupro coletivo está desaparecido"` devem usar a mesma chave se forem o mesmo caso: `"desaparecimento-jose-carlos-simonin-copacabana-2026"`.
+* Notícias sobre `"agentes dormindo em viatura"`, `"vídeo mostra policiais dormindo"` e `"flagrante de agentes do Segurança Presente"` devem usar a mesma chave se forem o mesmo flagrante: `"agentes-seguranca-presente-dormindo-viatura-centro-rio-2026"`.
+* Notícias sobre `"tiroteio em Duque de Caxias"`, `"mulher morre baleada durante perseguição"` e `"confronto que matou mulher em Caxias"` devem usar a mesma chave se forem o mesmo episódio: `"tiroteio-perseguicao-policial-duque-caxias-2026"`.
+* Notícias sobre `"ex-agente do Segurança Presente morto"`, `"assassinato de ex-agente"` e `"morte de ex-agente em Inhaúma"` devem usar a mesma chave se forem o mesmo caso: `"morte-ex-agente-seguranca-presente-inhauma-2025"`.
 
 Tipos de evento possíveis para `tipo_evento`:
 

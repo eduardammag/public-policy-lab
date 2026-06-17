@@ -21,11 +21,11 @@
 \contentsline {subsection}{\numberline {9.2}Fontes de publicação}{8}{subsection.9.2}%
 \contentsline {section}{\numberline {10}Ranking de eventos}{9}{section.10}%
 \contentsline {subsection}{\numberline {10.1}Critério de construção}{9}{subsection.10.1}%
-\contentsline {subsection}{\numberline {10.2}Eventos mais positivamente retratados}{9}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.2}Eventos mais positivamente retratados}{10}{subsection.10.2}%
 \contentsline {subsection}{\numberline {10.3}Eventos mais negativamente retratados}{10}{subsection.10.3}%
-\contentsline {section}{\numberline {11}Visualizações produzidas}{11}{section.11}%
-\contentsline {subsection}{\numberline {11.1}Distribuição geral}{11}{subsection.11.1}%
-\contentsline {subsection}{\numberline {11.2}Evolução temporal}{12}{subsection.11.2}%
+\contentsline {section}{\numberline {11}Visualizações produzidas}{12}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Distribuição geral}{12}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}Evolução temporal}{13}{subsection.11.2}%
 \contentsline {subsection}{\numberline {11.3}Fontes}{14}{subsection.11.3}%
 \contentsline {section}{\numberline {12}Discussão}{14}{section.12}%
 \contentsline {section}{\numberline {13}Conclusão}{14}{section.13}%

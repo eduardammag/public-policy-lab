@@ -5,6 +5,7 @@
 \usepackage[brazilian]{babel}
 \usepackage{geometry}
 \usepackage{graphicx}
+\usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -36,7 +37,7 @@
 \centering
 
 \vspace*{0.5cm}
-\includegraphics[width=0.34\textwidth]{src/Logo_FGV_-_Fundação_Getulio_Vargas.png}
+\includegraphics[width=0.34\textwidth]{src/logo_fgv.png}
 
 \vspace{1.2cm}
 {\Large Fundação Getulio Vargas\par}
@@ -254,9 +255,13 @@ ssp.am.gov.br & 6 \\
 
 \subsection{Critério de construção}
 
-O ranking de eventos foi construído a partir da chave canônica atribuída pelo modelo de linguagem a cada notícia. Para cada evento, foram calculados o número de notícias associadas, a quantidade de notícias com escore válido, a média do escore de sentimento, a proporção de notícias positivas, a proporção de notícias negativas e a distribuição dos rótulos individuais.
+O ranking de eventos foi construído exclusivamente a partir da chave canônica \texttt{evento\_chave}, retornada pelo modelo de linguagem durante a classificação. Essa chave foi definida no prompt como a unidade final de agrupamento para o ranking, de modo que notícias sobre o mesmo acontecimento factual devem receber a mesma chave desde a etapa de classificação.
 
-Para reduzir instabilidade estatística, o ranking principal considerou apenas eventos com pelo menos três notícias. Esse critério impede que um evento mencionado uma única vez apareça no topo ou na base do ranking apenas por ter recebido classificação extrema. A ordenação dos eventos mais positivamente retratados priorizou maior escore médio, maior proporção de notícias positivas, maior peso de classificações muito positivas e maior número de notícias. A ordenação dos eventos mais negativamente retratados aplicou lógica inversa, priorizando menor escore médio, maior proporção de negativas, maior peso de classificações muito negativas e maior número de notícias.
+Essa escolha evita aplicar, na etapa de ranking, correções posteriores por similaridade textual, agrupamentos por tema amplo ou regras heurísticas externas ao modelo. O script de ranqueamento apenas agrega as notícias que já compartilham o mesmo \texttt{evento\_id}, derivado de \texttt{evento\_chave}, e calcula estatísticas descritivas para cada evento.
+
+O ranking considerou eventos com pelo menos uma notícia e pelo menos uma notícia com escore de sentimento válido. Para cada evento, foram calculados o número total de notícias, a quantidade de notícias classificadas, a média do escore de sentimento, a proporção de notícias positivas, a proporção de notícias negativas e o peso das classificações extremas.
+
+A ordenação dos eventos mais positivamente retratados priorizou maior escore médio, maior proporção de notícias positivas, maior peso de classificações muito positivas e maior número de notícias. A ordenação dos eventos mais negativamente retratados aplicou lógica inversa, priorizando menor escore médio, maior proporção de notícias negativas, maior peso de classificações muito negativas e maior número de notícias.
 
 Para apresentação no relatório, o escore médio original, definido na escala de -2 a 2, foi normalizado para o intervalo de 0 a 1. A transformação aplicada foi:
 
@@ -266,42 +271,44 @@ Para apresentação no relatório, o escore médio original, definido na escala 
 
 Com isso, valores próximos de 0 indicam cobertura fortemente negativa, valores próximos de 0,5 indicam neutralidade ou equilíbrio e valores próximos de 1 indicam cobertura fortemente positiva. A normalização altera apenas a escala de apresentação; ela não modifica a ordenação substantiva dos rankings.
 
+
 \subsection{Eventos mais positivamente retratados}
 
-\begin{longtable}{p{7.2cm}rrrr}
-\toprule
-\textbf{Evento} & \textbf{N} & \textbf{Score norm.} & \textbf{Positivas} & \textbf{Negativas} \\
-\midrule
-\endhead
-Criação de comitê permanente de segurança escolar no Rio em 2023 & 4 & 0,7500 & 100,00\% & 0,00\% \\
-Inauguração da base do Segurança Presente em Irajá em 2025 & 3 & 0,7500 & 100,00\% & 0,00\% \\
-Lançamento da base do Segurança Presente em Búzios em 2025 & 3 & 0,7500 & 100,00\% & 0,00\% \\
-Abertura de inscrições para o vestibular Cederj de 2026 & 3 & 0,7500 & 33,33\% & 0,00\% \\
-Show da Shakira em Copacabana em 2026 & 4 & 0,7500 & 25,00\% & 0,00\% \\
-\bottomrule
-\caption{Top 5 eventos mais positivamente retratados, considerando apenas eventos com pelo menos três notícias e score normalizado em escala de 0 a 1.}
-\end{longtable}
+Com base na consolidacao dos temas, os eventos mais positivamente retratados foram:
 
-O topo do ranking positivo é composto por eventos administrativos, inaugurações, lançamentos de bases, ações de organização institucional e operações associadas a grandes eventos públicos. Esse resultado sugere que a cobertura tende a retratar o programa de forma favorável quando a pauta enfatiza expansão territorial, reforço operacional, presença estatal ou capacidade de organização em contextos de grande circulação de pessoas.
+\begin{enumerate}
+    \item \textbf{Comemoracao de um ano do Seguranca Presente em Nilopolis}: score medio 2,0; 1 noticia; 1 positiva, sendo 1 muito positiva.
+    \item \textbf{Inauguracao de novas bases do programa Seguranca Presente no Rio de Janeiro}: score medio 2,0; 1 noticia; 1 positiva, sendo 1 muito positiva.
+    \item \textbf{Operacao Seguranca Presente no Amazonas}: score medio 2,0; 1 noticia; 1 positiva, sendo 1 muito positiva.
+    \item \textbf{Reducao de ocorrencias durante o show de Shakira em Copacabana}: score medio 2,0; 1 noticia; 1 positiva, sendo 1 muito positiva.
+    \item \textbf{Resultados da Operacao Seguranca Presente em Volta Redonda}: score medio 2,0; 1 noticia; 1 positiva, sendo 1 muito positiva.
+    \item \textbf{Criacao do Comite Permanente de Seguranca Escolar no Rio de Janeiro}: score medio 1,0; 4 noticias positivas.
+    \item \textbf{Instalacao da base do Seguranca Presente em Rio das Ostras}: score medio 1,0; 4 noticias positivas.
+    \item \textbf{Instalacao da nova base da Operacao Seguranca Presente em Buzios}: score medio 1,0; 3 noticias positivas.
+    \item \textbf{Inauguracao da base do Programa Seguranca Presente em Buzios}: score medio 1,0; 3 noticias positivas.
+    \item \textbf{Inauguracao da base do Seguranca Presente em Iraja e entrega de novas viaturas}: score medio 1,0; 3 noticias positivas.
+\end{enumerate}
 
-A presença de eventos com baixa proporção de notícias explicitamente positivas, mas escore médio elevado, indica que parte dos agrupamentos contém notícias classificadas como não aplicáveis ou neutras. Nesses casos, o escore médio é calculado apenas sobre classificações válidas, razão pela qual a interpretação deve considerar simultaneamente média, proporção de positivas e número total de notícias.
+O topo do ranking positivo e composto por eventos cuja cobertura associou o programa a organizacao institucional, expansao territorial, reforco operacional ou avaliacao favoravel de decisoes administrativas. A interpretacao desses resultados depende diretamente da qualidade da \texttt{evento\_chave} gerada no prompt.
 
 \subsection{Eventos mais negativamente retratados}
 
-\begin{longtable}{p{7.2cm}rrrr}
-\toprule
-\textbf{Evento} & \textbf{N} & \textbf{Score norm.} & \textbf{Positivas} & \textbf{Negativas} \\
-\midrule
-\endhead
-Desaparecimento de José Carlos Simonin em Copacabana em 2026 & 3 & 0,1667 & 0,00\% & 100,00\% \\
-Inauguração da base do Segurança Presente em Iguaba Grande em 2026 & 3 & 0,4167 & 33,33\% & 66,67\% \\
-Transferência do Segurança Presente para a Polícia Militar em 2026 & 3 & 0,5000 & 33,33\% & 33,33\% \\
-Transferência do Segurança Presente para a Polícia Militar & 5 & 0,6250 & 40,00\% & 0,00\% \\
-\bottomrule
-\caption{Eventos mais negativamente retratados, considerando apenas eventos com pelo menos três notícias, ao menos uma notícia negativa e score normalizado em escala de 0 a 1.}
-\end{longtable}
+Com base na consolidacao dos temas, os eventos mais negativamente retratados foram:
 
-O evento mais negativamente retratado foi o desaparecimento de José Carlos Simonin em Copacabana em 2026, com score normalizado de 0,1667 e 100\% das notícias classificadas como negativas. Em seguida aparece o agrupamento relacionado à inauguração da base de Iguaba Grande, cujo score normalizado de 0,4167 decorre da mistura entre notícias de inauguração e textos associados a controvérsias administrativas. Esse caso evidencia uma limitação importante da extração automatizada de eventos: quando pautas próximas aparecem em um mesmo conjunto textual, o agrupamento pode reunir sinais substantivos distintos e demandar revisão qualitativa.
+\begin{enumerate}
+    \item \textbf{Auditorias revelam irregularidades no Seguranca Presente}: score medio -2,0; 3 noticias negativas, todas muito negativas.
+    \item \textbf{100 policiais baleados na Grande Rio em 2025}: score medio -2,0; 1 noticia negativa, muito negativa.
+    \item \textbf{Abordagem truculenta de policial militar a mulher com criancas no Centro do Rio}: score medio -2,0; 1 noticia negativa, muito negativa.
+    \item \textbf{Agente do Bope baleado por colega do Seguranca Presente em Duque de Caxias}: score medio -2,0; 1 noticia negativa, muito negativa.
+    \item \textbf{Anulacao da nomeacao de servidor acusado de corrupcao na PM}: score medio -2,0; 1 noticia negativa, muito negativa.
+    \item \textbf{Apreensao de planilha sobre divisao de cargos no governo do RJ}: score medio -2,0; 1 noticia negativa, muito negativa.
+    \item \textbf{Assalto a turistas na Pedra do Arpoador}: score medio -2,0; 1 noticia negativa, muito negativa.
+    \item \textbf{Assassinato de Gabriel Mongenot em Copacabana}: score medio -2,0; 1 noticia negativa, muito negativa.
+    \item \textbf{Investigacao sobre uso irregular de CPFs pelo governo do Rio}: score medio -2,0; 1 noticia negativa, muito negativa.
+    \item \textbf{Condenacao de ex-agente do Seguranca Presente por tentativa de feminicidio em Niteroi}: score medio -2,0; 1 noticia negativa, muito negativa.
+\end{enumerate}
+
+O ranking negativo reune eventos cuja cobertura associou o programa ou seu contexto institucional a falhas, controversias, violencia, criticas administrativas ou episodios desfavoraveis. Como nao ha consolidacao posterior no script, casos em que noticias do mesmo acontecimento aparecem separadas indicam necessidade de reclassificacao com o prompt atualizado.
 
 \section{Visualizações produzidas}
 

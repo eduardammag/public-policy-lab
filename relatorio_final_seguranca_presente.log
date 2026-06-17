@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.28)  17 JUN 2026 02:10
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.28)  17 JUN 2026 09:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -125,63 +125,129 @@ File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
 ))
 \Gin@req@height=\dimen158
 \Gin@req@width=\dimen159
+) (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+Package: amsmath 2025/07/09 v2.17z AMS math features
+\@mathmargin=\skip51
+For additional information on amsmath, use the `?' option.
+(C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+Package: amstext 2024/11/17 v2.01 AMS text
+
+(C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks21
+\ex@=\dimen160
+))
+(C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen161
+)
+(C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
+Package: amsopn 2022/04/08 v2.04 operator names
+)
+\inf@bad=\count288
+LaTeX Info: Redefining \frac on input line 233.
+\uproot@=\count289
+\leftroot@=\count290
+LaTeX Info: Redefining \overline on input line 398.
+LaTeX Info: Redefining \colon on input line 409.
+\classnum@=\count291
+\DOTSCASE@=\count292
+LaTeX Info: Redefining \ldots on input line 495.
+LaTeX Info: Redefining \dots on input line 498.
+LaTeX Info: Redefining \cdots on input line 619.
+\Mathstrutbox@=\box53
+\strutbox@=\box54
+LaTeX Info: Redefining \big on input line 721.
+LaTeX Info: Redefining \Big on input line 722.
+LaTeX Info: Redefining \bigg on input line 723.
+LaTeX Info: Redefining \Bigg on input line 724.
+\big@size=\dimen162
+LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
+\macc@depth=\count293
+LaTeX Info: Redefining \bmod on input line 904.
+LaTeX Info: Redefining \pmod on input line 909.
+LaTeX Info: Redefining \smash on input line 939.
+LaTeX Info: Redefining \relbar on input line 969.
+LaTeX Info: Redefining \Relbar on input line 970.
+\c@MaxMatrixCols=\count294
+\dotsspace@=\muskip17
+\c@parentequation=\count295
+\dspbrk@lvl=\count296
+\tag@help=\toks22
+\row@=\count297
+\column@=\count298
+\maxfields@=\count299
+\andhelp@=\toks23
+\eqnshift@=\dimen163
+\alignsep@=\dimen164
+\tagshift@=\dimen165
+\tagwidth@=\dimen166
+\totwidth@=\dimen167
+\lineht@=\dimen168
+\@envbody=\toks24
+\multlinegap=\skip52
+\multlinetaggap=\skip53
+\mathdisplay@stack=\toks25
+LaTeX Info: Redefining \[ on input line 2950.
+LaTeX Info: Redefining \] on input line 2951.
 )
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
-\heavyrulewidth=\dimen160
-\lightrulewidth=\dimen161
-\cmidrulewidth=\dimen162
-\belowrulesep=\dimen163
-\belowbottomsep=\dimen164
-\aboverulesep=\dimen165
-\abovetopsep=\dimen166
-\cmidrulesep=\dimen167
-\cmidrulekern=\dimen168
-\defaultaddspace=\dimen169
-\@cmidla=\count288
-\@cmidlb=\count289
-\@aboverulesep=\dimen170
-\@belowrulesep=\dimen171
-\@thisruleclass=\count290
-\@lastruleclass=\count291
-\@thisrulewidth=\dimen172
+\heavyrulewidth=\dimen169
+\lightrulewidth=\dimen170
+\cmidrulewidth=\dimen171
+\belowrulesep=\dimen172
+\belowbottomsep=\dimen173
+\aboverulesep=\dimen174
+\abovetopsep=\dimen175
+\cmidrulesep=\dimen176
+\cmidrulekern=\dimen177
+\defaultaddspace=\dimen178
+\@cmidla=\count300
+\@cmidlb=\count301
+\@aboverulesep=\dimen179
+\@belowrulesep=\dimen180
+\@thisruleclass=\count302
+\@lastruleclass=\count303
+\@thisrulewidth=\dimen181
 )
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/tools\longtable.sty
 Package: longtable 2025-10-13 v4.24 Multi-page Table package (DPC)
-\LTleft=\skip51
-\LTright=\skip52
-\LTpre=\skip53
-\LTpost=\skip54
-\LTchunksize=\count292
-\LTcapwidth=\dimen173
-\LT@head=\box53
-\LT@firsthead=\box54
-\LT@foot=\box55
-\LT@lastfoot=\box56
-\LT@gbox=\box57
-\LT@cols=\count293
-\LT@rows=\count294
-\c@LT@tables=\count295
-\c@LT@chunks=\count296
-\LT@p@ftn=\toks21
+\LTleft=\skip54
+\LTright=\skip55
+\LTpre=\skip56
+\LTpost=\skip57
+\LTchunksize=\count304
+\LTcapwidth=\dimen182
+\LT@head=\box55
+\LT@firsthead=\box56
+\LT@foot=\box57
+\LT@lastfoot=\box58
+\LT@gbox=\box59
+\LT@cols=\count305
+\LT@rows=\count306
+\c@LT@tables=\count307
+\c@LT@chunks=\count308
+\LT@p@ftn=\toks26
 )
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty
 Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
-\col@sep=\dimen174
-\ar@mcellbox=\box58
-\extrarowheight=\dimen175
-\NC@list=\toks22
-\extratabsurround=\skip55
-\backup@length=\skip56
-\ar@cellbox=\box59
+\col@sep=\dimen183
+\ar@mcellbox=\box60
+\extrarowheight=\dimen184
+\NC@list=\toks27
+\extratabsurround=\skip58
+\backup@length=\skip59
+\ar@cellbox=\box61
 )
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
-\c@float@type=\count297
-\float@exts=\toks23
-\float@box=\box60
-\@float@everytoks=\toks24
-\@floatcapt=\box61
+\c@float@type=\count309
+\float@exts=\toks28
+\float@box=\box62
+\@float@everytoks=\toks29
+\@floatcapt=\box63
 )
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
 Package: hyperref 2025-07-12 v7.01o Hypertext links for LaTeX
@@ -229,20 +295,20 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
-\c@section@level=\count298
+\c@section@level=\count310
 )
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
 Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count299
+\etb@tempcnta=\count311
 )
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.s
 ty
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
 )
 )
-\@linkdim=\dimen176
-\Hy@linkcounter=\count300
-\Hy@pagecounter=\count301
+\@linkdim=\dimen185
+\Hy@linkcounter=\count312
+\Hy@pagecounter=\count313
  (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
 File: pd1enc.def 2025-07-12 v7.01o Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
@@ -250,7 +316,7 @@ Now handling font encoding PD1 ...
 ) (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
-\Hy@SavedSpaceFactor=\count302
+\Hy@SavedSpaceFactor=\count314
  (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def
 File: puenc.def 2025-07-12 v7.01o Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
@@ -263,14 +329,14 @@ Package hyperref Info: Plain pages OFF on input line 4210.
 Package hyperref Info: Backreferencing OFF on input line 4215.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4462.
-\c@Hy@tempcnt=\count303
+\c@Hy@tempcnt=\count315
 
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
-\Urlmuskip=\muskip17
+\Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4801.
-\XeTeXLinkMargin=\dimen177
+\XeTeXLinkMargin=\dimen186
 
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
@@ -280,9 +346,9 @@ Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
 )
 ))
-\Fld@menulength=\count304
-\Field@Width=\dimen178
-\Fld@charsize=\dimen179
+\Fld@menulength=\count316
+\Field@Width=\dimen187
+\Fld@charsize=\dimen188
 Package hyperref Info: Hyper figures OFF on input line 6078.
 Package hyperref Info: Link nesting OFF on input line 6083.
 Package hyperref Info: Hyper index ON on input line 6086.
@@ -290,16 +356,16 @@ Package hyperref Info: backreferencing OFF on input line 6093.
 Package hyperref Info: Link coloring OFF on input line 6098.
 Package hyperref Info: Link coloring with OCG OFF on input line 6103.
 Package hyperref Info: PDF/A mode OFF on input line 6108.
-\Hy@abspage=\count305
-\c@Item=\count306
-\c@Hfootnote=\count307
+\Hy@abspage=\count317
+\c@Item=\count318
+\c@Hfootnote=\count319
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
 
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
 File: hpdftex.def 2025-07-12 v7.01o Hyperref driver for pdfTeX
-\Fld@listcount=\count308
-\c@bookmark@seq@number=\count309
+\Fld@listcount=\count320
+\c@bookmark@seq@number=\count321
 
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
 echeck.sty
@@ -312,7 +378,7 @@ Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 84.
 )
-\Hy@SectionHShift=\skip57
+\Hy@SectionHShift=\skip60
 )
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
 Package: xcolor 2024/09/29 v3.02 LaTeX color extensions (UK)
@@ -333,12 +399,12 @@ Package xcolor Info: Model `Gray' substituted by `gray' on input line 1371.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
 ) (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty
 Package: enumitem 2025/02/06 v3.11 Customized lists
-\labelindent=\skip58
-\enit@outerparindent=\dimen180
-\enit@toks=\toks25
-\enit@inbox=\box62
-\enit@count@id=\count310
-\enitdp@description=\count311
+\labelindent=\skip61
+\enit@outerparindent=\dimen189
+\enit@toks=\toks30
+\enit@inbox=\box64
+\enit@count@id=\count322
+\enitdp@description=\count323
 ) (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/lm\lmodern.sty
 Package: lmodern 2015/05/01 v1.6.1 Latin Modern Fonts
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
@@ -377,8 +443,8 @@ LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/tools\indentfirst.sty
 Package: indentfirst 2023/07/02 v1.03 Indent first paragraph (DPC)
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 30.
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 32
+Package hyperref Info: Option `colorlinks' set `true' on input line 31.
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 33
 .
 
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/lm\t1lmr.fd
@@ -387,31 +453,31 @@ File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
 tex.def
 File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count312
+\l__color_backend_stack_int=\count324
 ) (relatorio_final_seguranca_presente.aux
 Package babel Info: 'brazilian' activates 'portuges' shorthands.
 (babel)             Reported on input line 8.
 )
 \openout1 = `relatorio_final_seguranca_presente.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 32.
-LaTeX Font Info:    ... okay on input line 32.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 32.
-LaTeX Font Info:    ... okay on input line 32.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 32.
-LaTeX Font Info:    ... okay on input line 32.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 32.
-LaTeX Font Info:    ... okay on input line 32.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 32.
-LaTeX Font Info:    ... okay on input line 32.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 32.
-LaTeX Font Info:    ... okay on input line 32.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 32.
-LaTeX Font Info:    ... okay on input line 32.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 32.
-LaTeX Font Info:    ... okay on input line 32.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 32.
-LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 33.
+LaTeX Font Info:    ... okay on input line 33.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 33.
+LaTeX Font Info:    ... okay on input line 33.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 33.
+LaTeX Font Info:    ... okay on input line 33.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 33.
+LaTeX Font Info:    ... okay on input line 33.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 33.
+LaTeX Font Info:    ... okay on input line 33.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 33.
+LaTeX Font Info:    ... okay on input line 33.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 33.
+LaTeX Font Info:    ... okay on input line 33.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 33.
+LaTeX Font Info:    ... okay on input line 33.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 33.
+LaTeX Font Info:    ... okay on input line 33.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -451,17 +517,17 @@ LaTeX Font Info:    ... okay on input line 32.
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
 ii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count313
-\scratchdimen=\dimen181
-\scratchbox=\box63
-\nofMPsegments=\count314
-\nofMParguments=\count315
-\everyMPshowfont=\toks26
-\MPscratchCnt=\count316
-\MPscratchDim=\dimen182
-\MPnumerator=\count317
-\makeMPintoPDFobject=\count318
-\everyMPtoPDFconversion=\toks27
+\scratchcounter=\count325
+\scratchdimen=\dimen190
+\scratchbox=\box65
+\nofMPsegments=\count326
+\nofMParguments=\count327
+\everyMPshowfont=\toks31
+\MPscratchCnt=\count328
+\MPscratchDim=\dimen191
+\MPnumerator=\count329
+\makeMPintoPDFobject=\count330
+\everyMPtoPDFconversion=\toks32
 )
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
 ase.sty
@@ -473,23 +539,22 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 fg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
-Package hyperref Info: Link coloring ON on input line 32.
+Package hyperref Info: Link coloring ON on input line 33.
  (relatorio_final_seguranca_presente.out)
 (relatorio_final_seguranca_presente.out)
 \@outlinefile=\write3
 \openout3 = `relatorio_final_seguranca_presente.out'.
 
-<src/Logo_FGV_-_Fundação_Getulio_Vargas.png, id=127, 376.2858pt x 67.452pt>
-File: src/Logo_FGV_-_Fundação_Getulio_Vargas.png Graphic file (type png)
-<use src/Logo_FGV_-_Fundação_Getulio_Vargas.png>
-Package pdftex.def Info: src/Logo_FGV_-_Fundação_Getulio_Vargas.png  used on 
-input line 39.
+<src/logo_fgv.png, id=123, 376.2858pt x 67.452pt>
+File: src/logo_fgv.png Graphic file (type png)
+<use src/logo_fgv.png>
+Package pdftex.def Info: src/logo_fgv.png  used on input line 40.
 (pdftex.def)             Requested size: 154.78133pt x 27.74503pt.
  [1
 
 {C:/Users/dudda/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/dudd
-a/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc} <./src/Logo_FGV_-
-_Fundação_Getulio_Vargas.png>]
+a/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc} <./src/logo_fgv.p
+ng>]
 (relatorio_final_seguranca_presente.toc
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 5
 .
@@ -521,161 +586,96 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <8> on input line 5.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <6> on input line 5.
- [1])
+)
 \tf@toc=\write4
 \openout4 = `relatorio_final_seguranca_presente.toc'.
 
 
-[2] [3] [4]
+[1] [2] [3] [4]
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
-57.
+58.
 
 (C:\Users\dudda\AppData\Local\Programs\MiKTeX\tex/latex/lm\t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) [5]
 [6]
-Underfull \hbox (badness 1354) in paragraph at lines 186--187
+Underfull \hbox (badness 1354) in paragraph at lines 187--188
 \T1/lmr/m/n/12 mi-nis-tra-tiva ou des-cri-tiva, sem ava-li-a-��o
  []
 
-[7] [8]
-! Undefined control sequence.
-l.264 \text
-           {SCOREnormalizado} = \frac{\text{SCOREmédio} + 2}{4}
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-! Undefined control sequence.
-<argument> \text 
-                 {SCOREmédio} + 2
-l.264 ...izado} = \frac{\text{SCOREmédio} + 2}{4}
-                                                  
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-
-LaTeX Warning: Command \' invalid in math mode on input line 264.
-
-
-Overfull \hbox (0.58305pt too wide) in alignment at lines 271--275
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (0.58305pt too wide) in alignment at lines 275--283
- [] [] [] [] [] 
- []
-
-[9{C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathit.en
-c}{C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-rm.enc}]
-Overfull \hbox (0.58305pt too wide) in alignment at lines 291--295
- [] [] [] [] [] 
- []
-
-
-Underfull \hbox (badness 2111) in paragraph at lines 298--298
-[]|\T1/lmr/m/n/12 Transfer�ncia do Se-gu-ran�a Pre-sente
- []
-
-
-Underfull \hbox (badness 2111) in paragraph at lines 299--299
-[]|\T1/lmr/m/n/12 Transfer�ncia do Se-gu-ran�a Pre-sente
- []
-
-
-Overfull \hbox (0.58305pt too wide) in alignment at lines 295--302
- [] [] [] [] [] 
- []
-
-[10]
-<graficos/barras_quantidade_por_sentimento.png, id=227, 846.7635pt x 485.4135pt
+[7] [8] [9{C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-r
+m.enc}] [10]
+<graficos/barras_quantidade_por_sentimento.png, id=230, 846.7635pt x 485.4135pt
 >
 File: graficos/barras_quantidade_por_sentimento.png Graphic file (type png)
 <use graficos/barras_quantidade_por_sentimento.png>
 Package pdftex.def Info: graficos/barras_quantidade_por_sentimento.png  used on
- input line 312.
+ input line 319.
 (pdftex.def)             Requested size: 409.71692pt x 234.86975pt.
-<graficos/histograma_escore_sentimento.png, id=228, 774.4935pt x 448.877pt>
+ [11]
+<graficos/histograma_escore_sentimento.png, id=244, 774.4935pt x 448.877pt>
 File: graficos/histograma_escore_sentimento.png Graphic file (type png)
 <use graficos/histograma_escore_sentimento.png>
 Package pdftex.def Info: graficos/histograma_escore_sentimento.png  used on inp
-ut line 318.
+ut line 325.
 (pdftex.def)             Requested size: 409.71692pt x 237.46532pt.
- [11 <./graficos/barras_quantidade_por_sentimento.png>]
-<graficos/linha_percentual_mensal_sentimentos.png, id=235, 1063.5735pt x 547.24
+<graficos/linha_percentual_mensal_sentimentos.png, id=245, 1063.5735pt x 547.24
 45pt>
 File: graficos/linha_percentual_mensal_sentimentos.png Graphic file (type png)
 <use graficos/linha_percentual_mensal_sentimentos.png>
 Package pdftex.def Info: graficos/linha_percentual_mensal_sentimentos.png  used
- on input line 326.
+ on input line 333.
 (pdftex.def)             Requested size: 432.48051pt x 222.52629pt.
-<graficos/area_empilhada_percentual_mensal.png, id=236, 1063.5735pt x 546.843pt
+ [12 <./graficos/barras_quantidade_por_sentimento.png> <./graficos/histograma_e
+score_sentimento.png>]
+<graficos/area_empilhada_percentual_mensal.png, id=255, 1063.5735pt x 546.843pt
 >
 File: graficos/area_empilhada_percentual_mensal.png Graphic file (type png)
 <use graficos/area_empilhada_percentual_mensal.png>
 Package pdftex.def Info: graficos/area_empilhada_percentual_mensal.png  used on
- input line 332.
+ input line 339.
 (pdftex.def)             Requested size: 432.48051pt x 222.36302pt.
- [12 <./graficos/histograma_escore_sentimento.png> <./graficos/linha_percentual
-_mensal_sentimentos.png>]
-<graficos/linha_volume_mensal_noticias.png, id=246, 1063.5735pt x 485.815pt>
+<graficos/linha_volume_mensal_noticias.png, id=256, 1063.5735pt x 485.815pt>
 File: graficos/linha_volume_mensal_noticias.png Graphic file (type png)
 <use graficos/linha_volume_mensal_noticias.png>
 Package pdftex.def Info: graficos/linha_volume_mensal_noticias.png  used on inp
-ut line 338.
+ut line 345.
 (pdftex.def)             Requested size: 432.48051pt x 197.54718pt.
-<graficos/barras_empilhadas_top_fontes.png, id=247, 919.0335pt x 551.2595pt>
+ [13 <./graficos/linha_percentual_mensal_sentimentos.png> <./graficos/area_empi
+lhada_percentual_mensal.png>]
+<graficos/barras_empilhadas_top_fontes.png, id=265, 919.0335pt x 551.2595pt>
 File: graficos/barras_empilhadas_top_fontes.png Graphic file (type png)
 <use graficos/barras_empilhadas_top_fontes.png>
 Package pdftex.def Info: graficos/barras_empilhadas_top_fontes.png  used on inp
-ut line 346.
+ut line 353.
 (pdftex.def)             Requested size: 432.48051pt x 259.41164pt.
- [13 <./graficos/area_empilhada_percentual_mensal.png> <./graficos/linha_volume
-_mensal_noticias.png>] [14 <./graficos/barras_empilhadas_top_fontes.png>]
-(relatorio_final_seguranca_presente.aux)
+ [14 <./graficos/linha_volume_mensal_noticias.png> <./graficos/barras_empilhada
+s_top_fontes.png>] (relatorio_final_seguranca_presente.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
-
-
-Package rerunfilecheck Warning: File `relatorio_final_seguranca_presente.out' h
-as changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `relatorio_final_seguranca_presente.
-out':
-(rerunfilecheck)             Before: E59119D8187B4FA24F8E2BEAE8B0C106;5049
-(rerunfilecheck)             After:  BF300352F841EA0BCFEFC82388A0F681;4849.
+Package rerunfilecheck Info: File `relatorio_final_seguranca_presente.out' has 
+not changed.
+(rerunfilecheck)             Checksum: BF300352F841EA0BCFEFC82388A0F681;4849.
  ) 
 Here is how much of TeX's memory you used:
- 11684 strings out of 467871
- 188671 string characters out of 5418376
- 627253 words of memory out of 5000000
- 40339 multiletter control sequences out of 15000+600000
- 664146 words of font info for 61 fonts, out of 8000000 for 9000
+ 12398 strings out of 467871
+ 197695 string characters out of 5418376
+ 635491 words of memory out of 5000000
+ 41018 multiletter control sequences out of 15000+600000
+ 670126 words of font info for 63 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,10n,79p,776b,599s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,10n,79p,776b,610s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx12.pf
+b><C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr12.pfb
+><C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr17.pfb>
+<C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtt12.pfb>
 
-pdfTeX warning (dest): name{subsection.5.1} has been referenced but does not ex
-ist, replaced by a fixed one
-
-<C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx12.pfb>
-<C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi12.pfb>
-<C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr12.pfb><
-C:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr17.pfb><C
-:/Users/dudda/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtt12.pfb>
-Output written on relatorio_final_seguranca_presente.pdf (15 pages, 1210404 byt
+Output written on relatorio_final_seguranca_presente.pdf (15 pages, 1220752 byt
 es).
 PDF statistics:
- 306 PDF objects out of 1000 (max. 8388607)
- 67 named destinations out of 1000 (max. 500000)
- 284 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 316 PDF objects out of 1000 (max. 8388607)
+ 84 named destinations out of 1000 (max. 500000)
+ 276 words of extra memory for PDF output out of 10000 (max. 10000000)
 
