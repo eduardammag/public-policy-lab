@@ -1,0 +1,535 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\geometry{margin=2.5cm}
+\emergencystretch=2em
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\begin{document}
+
+\pagenumbering{gobble}
+\begin{titlepage}
+\centering
+
+\vspace*{0.5cm}
+\includegraphics[width=0.34\textwidth]{Logo_FGV_-_Fundação_Getulio_Vargas.png}
+
+\vspace{1.2cm}
+{\Large Fundação Getulio Vargas\par}
+\vspace{0.25cm}
+{\large Laboratório de Políticas Públicas\par}
+
+\vfill
+
+{\Large \textbf{Relatório Final de Pesquisa}\par}
+\vspace{0.8cm}
+{\huge \textbf{Entre Elogios e Críticas}\par}
+\vspace{0.35cm}
+{\Large Classificação Automatizada de Notícias sobre o Programa Segurança Presente com Modelos de Linguagem\par}
+
+\vfill
+
+\begin{flushleft}
+\large
+\textbf{Autoras e autores}\\[0.3cm]
+Maria Eduarda Mesquita Magalh\~aes\\
+Bianca Fialho Salgado Djelberian\\
+Maria Teresa Mendes Madureira\\
+Kayo Francisco da Silva\\
+Sarah Ribeiro Lattouf\\[0.8cm]
+\textbf{Professora}\\[0.3cm]
+[Katia Aiko Nishiyama Alves]
+\end{flushleft}
+
+\vfill
+
+{\large Rio de Janeiro\\Junho de 2026\par}
+
+\end{titlepage}
+
+\pagenumbering{arabic}
+
+\begin{abstract}
+Este relatório apresenta a versão final do projeto de análise automatizada de notícias sobre o programa Segurança Presente, desenvolvido a partir do pré-projeto \textit{LLM Segurança Presente}. O objetivo foi aplicar um modelo de linguagem de grande escala para classificar notícias segundo a percepção retratada na cobertura jornalística e, simultaneamente, identificar o evento ou tema factual central de cada notícia. A pipeline final parte de um arquivo JSON já coletado, remove duplicatas nas análises agregadas, classifica sentimento e evento em uma única chamada ao LLM, gera tabelas analíticas, gráficos temporais e rankings de eventos mais positivamente e negativamente retratados. Ao final, foram processadas 863 linhas brutas de notícias e produzida uma base final com 852 notícias únicas.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introdução}
+
+O pré-projeto que orientou este trabalho propôs investigar como modelos de linguagem de grande escala, ou LLMs, poderiam ser usados para classificar notícias sobre políticas públicas de segurança de acordo com a percepção pública retratada pela mídia. A motivação central era lidar com um volume de notícias grande demais para classificação manual sistemática, especialmente em um tema sensível como segurança pública no Rio de Janeiro.
+
+Na versão final, o recorte foi concentrado no programa Segurança Presente. O trabalho não mede diretamente a opinião da população, como faria uma pesquisa amostral. O objeto analisado é a cobertura jornalística online: isto é, como as notícias disponíveis retratam o programa, suas ações, eventos associados, controvérsias, operações, inaugurações, decisões administrativas e resultados.
+
+A pergunta operacional que guiou a implementação foi:
+
+\begin{quote}
+Como uma LLM pode classificar, em escala, notícias sobre o Segurança Presente quanto ao sentimento retratado e quanto ao evento factual central de cada notícia?
+\end{quote}
+
+\section{Objetivos}
+
+\subsection{Objetivo geral}
+
+Construir uma pipeline reprodutível que, a partir de um JSON de notícias já coletadas, classifique cada notícia quanto ao sentimento retratado sobre o Segurança Presente e identifique o evento factual central de cada texto.
+
+\subsection{Objetivos específicos}
+
+\begin{itemize}
+    \item Ler as notícias a partir de um único arquivo JSON de entrada.
+    \item Evitar duplicidade nas análises finais.
+    \item Classificar cada notícia em uma escala de sentimento.
+    \item Extrair, por LLM, o evento ou tema factual principal de cada notícia.
+    \item Gerar um CSV com uma linha por notícia classificada.
+    \item Gerar tabelas agregadas de sentimento, ambiguidade, fonte e tempo.
+    \item Gerar gráficos de evolução temporal e distribuição dos sentimentos.
+    \item Produzir rankings de eventos mais positivamente e negativamente retratados.
+\end{itemize}
+
+\section{Dados}
+
+A base de entrada usada pela pipeline final é:
+
+\begin{verbatim}
+src/dados_entrada/seguranca_presente_artigos.json
+\end{verbatim}
+
+O arquivo contém notícias associadas ao Segurança Presente. A pipeline atual não depende mais de caminhos duplicados, snapshots antigos ou bases alternativas. O repositório foi simplificado para partir diretamente desse JSON.
+
+\subsection{Cobertura temporal}
+
+As notícias com data válida cobrem o período entre:
+
+\begin{itemize}
+    \item \textbf{31 de maio de 2016}
+    \item \textbf{11 de junho de 2026}
+\end{itemize}
+
+Foram identificadas 827 notícias com data válida na base final deduplicada. Notícias sem data válida continuam podendo entrar nas análises não temporais, mas são excluídas dos gráficos de série temporal.
+
+\subsection{Tamanho da base}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+\textbf{Etapa} & \textbf{Quantidade} \\
+\midrule
+Linhas brutas classificadas pelo LLM & 863 \\
+Notícias únicas na base final & 852 \\
+Duplicatas no CSV final & 0 \\
+Notícias com data válida na base final & 827 \\
+\bottomrule
+\end{tabular}
+\caption{Tamanho da base processada.}
+\end{table}
+
+\section{Pipeline implementada}
+
+A pipeline principal foi organizada como um fluxo sequencial. O objetivo foi transformar uma base bruta de notícias em um conjunto de produtos analíticos: uma tabela com a classificação individual de cada notícia, estatísticas agregadas, gráficos de evolução temporal e rankings de eventos. O procedimento completo pode ser resumido em três grandes fases:
+
+\begin{enumerate}
+    \item Classificação das notícias com LLM.
+    \item Geração de tabelas e gráficos de sentimento.
+    \item Geração do ranking de eventos.
+\end{enumerate}
+
+\subsection{Preparação da entrada}
+
+Antes da classificação, a base de notícias é lida a partir de um único arquivo JSON. Cada registro bruto é convertido em uma observação padronizada, preservando as informações necessárias para análise posterior: identificador da notícia, identificador do artigo, título, fonte, data de publicação, resumo, texto integral quando disponível e metadados de origem.
+
+Essa padronização é importante porque nem todos os registros chegam exatamente com o mesmo nível de informação. Algumas notícias possuem texto completo; outras têm principalmente título e resumo. Por isso, o procedimento monta um campo textual composto, juntando título, resumo e corpo da notícia. Esse texto combinado é o que será enviado ao modelo de linguagem para classificação.
+
+Também é preservado um identificador interno da linha original. Esse identificador permite manter o arquivo bruto de classificação com o mesmo número de linhas da base de entrada, mesmo quando há notícias repetidas. A remoção de duplicatas acontece apenas nas etapas analíticas finais.
+
+\subsection{Fase 1: classificação LLM}
+
+A primeira fase envia cada notícia para um modelo de linguagem da OpenAI. O modelo usado na configuração final é:
+
+\begin{verbatim}
+gpt-4o-mini
+\end{verbatim}
+
+A chave de API é lida do arquivo \texttt{.env}, por meio da variável:
+
+\begin{verbatim}
+OPENAI_API_KEY
+\end{verbatim}
+
+Para cada notícia, o procedimento executa os seguintes passos:
+
+\begin{enumerate}
+    \item reúne título, resumo e texto bruto em uma única entrada textual;
+    \item limita o tamanho do texto enviado para evitar excesso de tokens;
+    \item insere a notícia no prompt de classificação;
+    \item envia a requisição ao modelo com temperatura zero, buscando respostas mais estáveis;
+    \item exige uma resposta em formato JSON;
+    \item interpreta o JSON retornado;
+    \item normaliza o rótulo de sentimento e o grau de ambiguidade;
+    \item grava a linha classificada no arquivo de saída.
+\end{enumerate}
+
+O sistema também foi preparado para retomar execuções interrompidas. Se uma notícia já havia sido classificada anteriormente e possui rótulo de sentimento e evento preenchidos, ela não é enviada novamente ao modelo. Isso reduz custo, tempo de execução e risco de inconsistência entre rodadas.
+
+O resultado bruto da classificação é salvo em:
+
+\begin{verbatim}
+tabelas/llm_labels.csv
+\end{verbatim}
+
+Esse arquivo possui 863 linhas, uma para cada registro original classificado.
+
+\subsection{Prompt único}
+
+Uma decisão importante da versão final foi usar um único prompt para duas tarefas:
+
+\begin{enumerate}
+    \item Classificar o sentimento da notícia.
+    \item Identificar o evento factual central da notícia.
+\end{enumerate}
+
+O prompt foi mantido separado da lógica de execução para facilitar revisão metodológica. Ele orienta o modelo a retornar somente um JSON válido, com os seguintes campos principais:
+
+\begin{itemize}
+    \item \texttt{label}
+    \item \texttt{sentiment\_score}
+    \item \texttt{grau\_ambiguidade}
+    \item \texttt{reason\_sentimento}
+    \item \texttt{evento}
+    \item \texttt{evento\_chave}
+    \item \texttt{tipo\_evento}
+    \item \texttt{local}
+    \item \texttt{data\_evento}
+    \item \texttt{descricao\_curta}
+    \item \texttt{evidencia\_sentimento}
+    \item \texttt{evidencia\_evento}
+\end{itemize}
+
+O desenho do prompt segue quatro princípios. Primeiro, o modelo deve analisar apenas o conteúdo da notícia, sem completar informações com conhecimento externo. Segundo, o sentimento deve se referir ao modo como o programa, sua gestão, seus agentes ou eventos associados são retratados, e não a uma avaliação genérica de segurança pública. Terceiro, crimes e prisões não são classificados automaticamente como negativos ou positivos: a notícia precisa associar o fato ao programa para que o sentimento seja atribuído. Quarto, o evento identificado deve ser factual e específico, evitando categorias amplas demais como ``segurança pública'' ou ``policiamento''.
+
+Essa escolha foi importante porque o objetivo final não era apenas contar sentimentos, mas também produzir um ranking de acontecimentos concretos. Assim, o modelo precisava separar eventos parecidos, mas distintos. Um show da Shakira e um show da Lady Gaga, por exemplo, são ambos eventos culturais em Copacabana, mas não são o mesmo evento analítico.
+
+\subsection{Classes de sentimento}
+
+O modelo foi instruído a escolher exatamente uma das seguintes classes:
+
+\begin{itemize}
+    \item \texttt{muito negativo}
+    \item \texttt{negativo}
+    \item \texttt{neutro}
+    \item \texttt{positivo}
+    \item \texttt{muito positivo}
+    \item \texttt{n/a}
+\end{itemize}
+
+O campo \texttt{sentiment\_score} traduz essas classes para uma escala numérica:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+\textbf{Classe} & \textbf{Escore} \\
+\midrule
+muito negativo & -2 \\
+negativo & -1 \\
+neutro & 0 \\
+positivo & 1 \\
+muito positivo & 2 \\
+n/a & nulo \\
+\bottomrule
+\end{tabular}
+\caption{Conversão dos rótulos de sentimento em escore numérico.}
+\end{table}
+
+Esse escore permite calcular médias por evento e construir rankings de eventos mais amados e mais odiados.
+
+Na prática, essa escala transforma uma classificação textual em uma medida numérica simples. Com isso, é possível calcular a média de sentimento de um evento, comparar eventos entre si e ordenar os casos mais negativos e mais positivos. Notícias classificadas como \texttt{n/a} não entram no cálculo da média, porque não representam uma avaliação clara do programa ou do evento.
+
+\subsection{Grau de ambiguidade}
+
+Em vez de usar uma métrica abstrata de confiança, a pipeline final usa o campo \texttt{grau\_ambiguidade}, com três valores possíveis:
+
+\begin{itemize}
+    \item \texttt{baixo}: a notícia aponta claramente para um rótulo.
+    \item \texttt{medio}: há sinais mistos, mas um rótulo predomina.
+    \item \texttt{alto}: o sentimento é incerto, lateral ou contraditório.
+\end{itemize}
+
+Esse campo substitui uma métrica de confiança numérica. A vantagem é interpretativa: em vez de apresentar uma pontuação abstrata, o relatório informa se a própria classificação foi direta ou se dependeu de uma leitura mais ambígua. Isso ajuda a identificar pontos que merecem revisão qualitativa.
+
+\subsection{Fase 2: gráficos e tabelas}
+
+A segunda fase parte do arquivo bruto de classificações, remove duplicatas por \texttt{articleId} e gera a base final:
+
+\begin{verbatim}
+tabelas/noticias_classificadas.csv
+\end{verbatim}
+
+Esse CSV possui 852 linhas, ou seja, uma linha por notícia única.
+
+Depois da deduplicação, o procedimento organiza as datas, padroniza os rótulos e calcula variáveis temporais, como mês de publicação. Notícias com data inválida continuam na base final e nas análises gerais, mas não entram nos gráficos mensais, pois não podem ser posicionadas corretamente no tempo.
+
+Em seguida, são calculadas estatísticas agregadas. A contagem geral por sentimento indica a distribuição total da cobertura. As tabelas mensais mostram como a composição dos sentimentos varia ao longo do tempo. A tabela de ambiguidade resume quantas classificações foram diretas ou incertas. A tabela por fonte mostra como os principais veículos aparecem na base e quais sentimentos predominam em cada um.
+
+Também são geradas tabelas agregadas, como:
+
+\begin{itemize}
+    \item \texttt{tabelas/sentiment\_counts.csv}
+    \item \texttt{tabelas/monthly\_sentiment\_counts.csv}
+    \item \texttt{tabelas/monthly\_sentiment\_percent.csv}
+    \item \texttt{tabelas/ambiguity\_counts.csv}
+    \item \texttt{tabelas/top\_sources\_sentiment\_counts.csv}
+\end{itemize}
+
+Os gráficos finais são salvos em:
+
+\begin{verbatim}
+graficos/
+\end{verbatim}
+
+Os gráficos foram escolhidos para responder a perguntas complementares. O gráfico de barras por sentimento mostra a distribuição geral da base. O histograma do escore resume a intensidade das classificações. A linha mensal de percentuais mostra mudanças na composição dos sentimentos ao longo do tempo. A área empilhada apresenta a mesma informação de forma acumulada. A linha de volume mensal mostra quando houve maior concentração de notícias. O gráfico de ambiguidade indica a segurança interpretativa das classificações. Por fim, o gráfico por fonte permite observar diferenças entre veículos.
+
+\subsection{Fase 3: ranking de eventos}
+
+A terceira fase usa a base deduplicada \texttt{noticias\_classificadas.csv} para gerar:
+
+\begin{itemize}
+    \item \texttt{tabelas/eventos\_por\_noticia.csv}
+    \item \texttt{tabelas/eventos\_resumo.csv}
+    \item \texttt{tabelas/eventos\_mais\_amados.csv}
+    \item \texttt{tabelas/eventos\_mais\_odiados.csv}
+    \item \texttt{tabelas/ranking-eventos.md}
+\end{itemize}
+
+Cada evento é definido pelo campo \texttt{evento\_chave}, gerado pela LLM. O prompt foi desenhado para evitar agrupamentos excessivamente genéricos. Por exemplo, \textit{Show da Shakira em Copacabana} e \textit{Show da Lady Gaga em Copacabana} devem ser tratados como eventos diferentes, mesmo que ambos envolvam shows em Copacabana.
+
+Nessa etapa, as notícias são agrupadas pelo evento canônico. Para cada grupo, são calculados: número de notícias, número de notícias classificadas com escore válido, média do \texttt{sentiment\_score}, quantidade de notícias em cada rótulo, proporção de positivas, proporção de negativas, distribuição do grau de ambiguidade e exemplos de títulos associados ao evento.
+
+O ranking principal usa um filtro mínimo de três notícias por evento. Esse filtro evita que um único texto muito positivo ou muito negativo domine o resultado. Depois do filtro, os eventos mais amados são ordenados pela maior média de sentimento; os eventos mais odiados são ordenados pela menor média. Em caso de empate, o procedimento considera a proporção de notícias positivas ou negativas, o peso dos extremos e o número total de notícias do evento.
+
+\section{Deduplicação}
+
+A base bruta possui 863 linhas. Algumas notícias aparecem mais de uma vez, por isso a análise final remove duplicatas usando o campo \texttt{articleId}. Depois dessa etapa, a base final possui 852 notícias únicas.
+
+A deduplicação é aplicada antes das tabelas finais, dos gráficos e do ranking de eventos. Assim, uma notícia repetida não pesa duas vezes nos resultados agregados.
+
+\section{Resultados gerais de sentimento}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrr}
+\toprule
+\textbf{Sentimento} & \textbf{Notícias} & \textbf{Percentual} \\
+\midrule
+muito negativo & 29 & 3,40\% \\
+negativo & 189 & 22,18\% \\
+neutro & 18 & 2,11\% \\
+positivo & 506 & 59,39\% \\
+muito positivo & 4 & 0,47\% \\
+n/a & 106 & 12,44\% \\
+\bottomrule
+\end{tabular}
+\caption{Distribuição de sentimentos na base final deduplicada.}
+\end{table}
+
+O resultado geral indica predominância de notícias classificadas como positivas. Somando \texttt{positivo} e \texttt{muito positivo}, há 510 notícias, equivalentes a aproximadamente 59,86\% da base final. Já as classes \texttt{negativo} e \texttt{muito negativo} somam 218 notícias, ou aproximadamente 25,59\% da base.
+
+As notícias classificadas como \texttt{n/a} representam 12,44\%. Esse rótulo foi usado quando a notícia mencionava Segurança Presente de forma lateral ou quando não havia elementos suficientes para avaliar o programa, seus agentes, sua gestão ou evento relacionado.
+
+\section{Ambiguidade da classificação}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+\textbf{Grau de ambiguidade} & \textbf{Notícias} \\
+\midrule
+baixo & 799 \\
+medio & 1 \\
+alto & 52 \\
+\bottomrule
+\end{tabular}
+\caption{Distribuição do grau de ambiguidade.}
+\end{table}
+
+A maior parte das classificações foi marcada como de baixa ambiguidade. Isso significa que, segundo o próprio critério solicitado ao modelo, a maioria das notícias apontava claramente para um rótulo de sentimento. O grupo de alta ambiguidade corresponde a textos mais laterais, incertos, contraditórios ou dependentes de interpretação.
+
+\section{Rankings de eventos}
+
+Os rankings foram calculados apenas para eventos com pelo menos três notícias, a fim de evitar que um único texto isolado dominasse a interpretação. O ranking usa como critério principal a média de \texttt{sentiment\_score}. Em caso de empate, são considerados a proporção de notícias positivas ou negativas, o peso dos extremos e o número de notícias.
+
+\subsection{Eventos mais amados}
+
+\begin{longtable}{p{8cm}rrrr}
+\toprule
+\textbf{Evento} & \textbf{N} & \textbf{Score médio} & \textbf{Pos.} & \textbf{Neg.} \\
+\midrule
+\endhead
+Criação do comitê permanente de segurança escolar no Rio em 2023 & 4 & 1,0000 & 100,00\% & 0,00\% \\
+Abertura do concurso Segurança Presente RJ em 2025 & 3 & 1,0000 & 100,00\% & 0,00\% \\
+Inauguração da base do Segurança Presente em Irajá em 2025 & 3 & 1,0000 & 100,00\% & 0,00\% \\
+Show da Lady Gaga em Copacabana em 2025 & 3 & 1,0000 & 66,67\% & 0,00\% \\
+Show da Shakira em Copacabana em 2026 & 4 & 1,0000 & 25,00\% & 0,00\% \\
+Transferência do Segurança Presente para a Polícia Militar em 2026 & 3 & 0,6667 & 66,67\% & 0,00\% \\
+Transferência do Segurança Presente para a Polícia Militar & 7 & 0,5000 & 42,86\% & 0,00\% \\
+Inauguração da base do Segurança Presente em Iguaba Grande em 2026 & 4 & 0,0000 & 50,00\% & 50,00\% \\
+Desaparecimento de José Carlos Simonin em Copacabana em 2026 & 3 & -1,3333 & 0,00\% & 100,00\% \\
+\bottomrule
+\caption{Ranking de eventos mais positivamente retratados, considerando eventos com pelo menos três notícias.}
+\end{longtable}
+
+O topo do ranking positivo é composto principalmente por eventos administrativos, expansões, concursos, inaugurações e grandes operações de organização urbana em eventos públicos. Isso sugere que a cobertura tende a retratar positivamente o programa quando há anúncio de reforço, expansão, concurso, inauguração ou planejamento de segurança para eventos de grande visibilidade.
+
+\subsection{Eventos mais odiados}
+
+\begin{longtable}{p{8cm}rrrr}
+\toprule
+\textbf{Evento} & \textbf{N} & \textbf{Score médio} & \textbf{Pos.} & \textbf{Neg.} \\
+\midrule
+\endhead
+Desaparecimento de José Carlos Simonin em Copacabana em 2026 & 3 & -1,3333 & 0,00\% & 100,00\% \\
+Inauguração da base do Segurança Presente em Iguaba Grande em 2026 & 4 & 0,0000 & 50,00\% & 50,00\% \\
+Transferência do Segurança Presente para a Polícia Militar & 7 & 0,5000 & 42,86\% & 0,00\% \\
+Transferência do Segurança Presente para a Polícia Militar em 2026 & 3 & 0,6667 & 66,67\% & 0,00\% \\
+Criação do comitê permanente de segurança escolar no Rio em 2023 & 4 & 1,0000 & 100,00\% & 0,00\% \\
+Show da Shakira em Copacabana em 2026 & 4 & 1,0000 & 25,00\% & 0,00\% \\
+Abertura do concurso Segurança Presente RJ em 2025 & 3 & 1,0000 & 100,00\% & 0,00\% \\
+Inauguração da base do Segurança Presente em Irajá em 2025 & 3 & 1,0000 & 100,00\% & 0,00\% \\
+Show da Lady Gaga em Copacabana em 2025 & 3 & 1,0000 & 66,67\% & 0,00\% \\
+\bottomrule
+\caption{Ranking de eventos mais negativamente retratados, considerando eventos com pelo menos três notícias.}
+\end{longtable}
+
+O principal evento negativamente retratado foi o desaparecimento de José Carlos Simonin em Copacabana em 2026, com média de -1,3333 e 100\% de notícias negativas dentro do grupo. Em seguida aparece a inauguração da base de Iguaba Grande, com média zero, pois o grupo reuniu notícias positivas sobre inauguração e notícias negativas associadas a controvérsias salariais citadas no mesmo conjunto de eventos. Isso mostra uma limitação importante: mesmo com prompt cuidadoso, eventos compostos ou mal agrupados podem misturar pautas próximas e exigir revisão qualitativa.
+
+\section{Gráficos produzidos}
+
+A pipeline gerou sete gráficos principais:
+
+\begin{itemize}
+    \item \texttt{linha\_percentual\_mensal\_sentimentos.png}
+    \item \texttt{area\_empilhada\_percentual\_mensal.png}
+    \item \texttt{barras\_quantidade\_por\_sentimento.png}
+    \item \texttt{barras\_grau\_ambiguidade.png}
+    \item \texttt{histograma\_escore\_sentimento.png}
+    \item \texttt{linha\_volume\_mensal\_noticias.png}
+    \item \texttt{barras\_empilhadas\_top\_fontes.png}
+\end{itemize}
+
+\subsection{Distribuição geral}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{graficos/barras_quantidade_por_sentimento.png}
+\caption{Quantidade de notícias por sentimento.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{graficos/histograma_escore_sentimento.png}
+\caption{Histograma do escore de sentimento.}
+\end{figure}
+
+\subsection{Evolução temporal}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{graficos/linha_percentual_mensal_sentimentos.png}
+\caption{Percentual mensal de notícias por sentimento.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{graficos/area_empilhada_percentual_mensal.png}
+\caption{Composição mensal dos sentimentos.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{graficos/linha_volume_mensal_noticias.png}
+\caption{Volume mensal de notícias classificadas.}
+\end{figure}
+
+\subsection{Ambiguidade e fontes}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{graficos/barras_grau_ambiguidade.png}
+\caption{Grau de ambiguidade da classificação.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{graficos/barras_empilhadas_top_fontes.png}
+\caption{Distribuição de sentimentos por fonte, considerando as principais fontes.}
+\end{figure}
+
+\section{Produtos finais gerados}
+
+\subsection{Tabelas}
+
+\begin{itemize}
+    \item \texttt{tabelas/llm\_labels.csv}: saída bruta da LLM, com 863 linhas.
+    \item \texttt{tabelas/noticias\_classificadas.csv}: base final deduplicada, com 852 notícias.
+    \item \texttt{tabelas/sentiment\_counts.csv}: contagem total por sentimento.
+    \item \texttt{tabelas/monthly\_sentiment\_counts.csv}: contagem mensal por sentimento.
+    \item \texttt{tabelas/monthly\_sentiment\_percent.csv}: percentual mensal por sentimento.
+    \item \texttt{tabelas/ambiguity\_counts.csv}: contagem por grau de ambiguidade.
+    \item \texttt{tabelas/top\_sources\_sentiment\_counts.csv}: sentimentos por fonte.
+    \item \texttt{tabelas/eventos\_por\_noticia.csv}: evento extraído para cada notícia única.
+    \item \texttt{tabelas/eventos\_resumo.csv}: resumo agregado por evento.
+    \item \texttt{tabelas/eventos\_mais\_amados.csv}: ranking positivo.
+    \item \texttt{tabelas/eventos\_mais\_odiados.csv}: ranking negativo.
+    \item \texttt{tabelas/ranking-eventos.md}: relatório em Markdown dos rankings.
+\end{itemize}
+
+\subsection{Procedimento computacional}
+
+O procedimento computacional final foi dividido em módulos lógicos. Primeiro, uma etapa de leitura carrega o JSON de entrada e transforma cada registro bruto em uma observação padronizada, preservando identificador, título, fonte, data, resumo e texto. Em seguida, uma etapa de classificação envia cada notícia ao modelo de linguagem com um prompt único e recebe como resposta um objeto estruturado contendo sentimento, escore, ambiguidade e evento factual.
+
+Depois da classificação, uma etapa de consolidação remove duplicatas por identificador de notícia e gera a base analítica final. Sobre essa base, são calculadas contagens gerais, percentuais mensais, distribuição por fonte e distribuição de ambiguidade. Por fim, uma etapa de agregação agrupa notícias pelo evento canônico retornado pelo modelo, calcula métricas por evento e produz os rankings de eventos mais positivamente e negativamente retratados.
+
+\section{Discussão}
+
+Os resultados indicam que a cobertura jornalística analisada tende a retratar o Segurança Presente de forma majoritariamente positiva, especialmente em notícias sobre expansão, inauguração de bases, concursos, reforço de policiamento e organização de grandes eventos. Ainda assim, há um conjunto relevante de notícias negativas ou muito negativas, associado a controvérsias, crimes, desaparecimentos, críticas ou problemas institucionais.
+
+O ranking por eventos é uma etapa mais interpretativa do que a contagem geral por sentimento. Ele permite sair da pergunta ``quantas notícias foram positivas ou negativas?'' e chegar a uma pergunta mais substantiva: ``quais acontecimentos concretos concentraram elogios ou críticas?''. Essa mudança é importante porque notícias com palavras semelhantes podem se referir a eventos diferentes, como shows distintos em Copacabana, enquanto notícias com redações distintas podem tratar do mesmo fato administrativo.
+
+\section{Limitações}
+
+O projeto possui limitações que devem ser consideradas:
+
+\begin{itemize}
+    \item A análise mede a cobertura midiática, não a opinião direta da população.
+    \item A base depende das notícias coletadas e pode não representar todo o universo jornalístico disponível.
+    \item Conteúdos pagos, removidos ou não indexados podem estar ausentes.
+    \item A classificação depende do prompt e do comportamento do modelo usado.
+    \item A identificação de eventos por LLM pode gerar agrupamentos imperfeitos.
+    \item Eventos com poucas notícias podem produzir rankings instáveis; por isso foi usado filtro mínimo de três notícias.
+    \item O campo \texttt{n/a} evita forçar sentimento em notícias laterais, mas também reduz a quantidade de textos efetivamente interpretáveis.
+\end{itemize}
+
+\section{Conclusão}
+
+O projeto atingiu o objetivo proposto no pré-projeto: construir uma forma automatizada de classificar notícias sobre políticas públicas de segurança usando LLMs. A implementação final foi além da classificação simples de sentimentos, pois também extraiu eventos factuais e permitiu gerar rankings de acontecimentos mais positivamente e negativamente retratados.
+
+A pipeline final é reprodutível, parte de um único JSON de entrada, gera um CSV com classificação por notícia, remove duplicatas nas análises finais, produz gráficos e entrega rankings agregados por evento. O resultado oferece uma leitura sistemática da cobertura midiática sobre o Segurança Presente entre 2016 e 2026, com predominância de notícias positivas, mas também com identificação de eventos críticos e ambíguos que merecem análise qualitativa complementar.
+
+\end{document}

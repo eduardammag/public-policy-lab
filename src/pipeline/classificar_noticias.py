@@ -1,11 +1,4 @@
-#!/usr/bin/env python3
-"""LLM classification helper using OpenAI (renamed).
-
-Reads OpenAI key from environment (or .env) and provides a simple
-zero-shot classifier that emits a CSV with labels.
-"""
 from __future__ import annotations
-
 import argparse
 import csv
 import json
@@ -13,9 +6,9 @@ import os
 import re
 import sys
 import time
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional
 
 from src.configuracoes.config import SENTIMENT_ORDER, TABLES_DIR
 
@@ -85,6 +78,22 @@ def slugify(text: str) -> str:
         text = text.replace(src, dst)
     text = re.sub(r"[^a-z0-9]+", "-", text).strip("-")
     return re.sub(r"-+", "-", text) or "evento-sem-chave"
+
+
+def _remove_accents(s: str) -> str:
+    """Return a lowercase, accent-free string for robust matching."""
+    if not s:
+        return ""
+    s_norm = unicodedata.normalize("NFD", s)
+    return "".join(ch for ch in s_norm if unicodedata.category(ch) != "Mn").lower()
+
+
+def contains_exact_phrase(rec: dict, phrase: str = "seguranca presente") -> bool:
+    text = "\n\n".join([rec.get("title", ""), rec.get("summaryPreview", ""), rec.get("rawText", "")])
+    text_norm = _remove_accents(text)
+    phrase_norm = _remove_accents(phrase)
+    # word boundaries to avoid matching substrings
+    return re.search(rf"\b{re.escape(phrase_norm)}\b", text_norm, flags=re.IGNORECASE) is not None
 
 
 def ensure_openai_available() -> None:
@@ -207,18 +216,13 @@ def classify_text(
         }
 
 
-def load_data_for_classification() -> tuple[dict, dict, Path]:
+def load_data_for_classification() -> tuple[dict, Path]:
     try:
         from src.utilitarios.dados_noticias import load_data
 
         return load_data()
     except Exception:
         raise SystemExit("Cannot import data loader from src/utilitarios/dados_noticias.py")
-
-
-def find_article_by_aid(arts: list[dict], aid: str) -> Optional[dict]:
-    aid = aid if aid.startswith("a-") else f"a-{aid}"
-    return next((r for r in arts if r["id"] == aid or r.get("recordKey") == aid), None)
 
 
 def read_existing_rows(path: Path) -> dict[str, dict]:
@@ -280,45 +284,39 @@ def article_to_row(rec: dict, out: dict, model: str) -> dict:
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--aid", type=str, help="article id (a-NNN)")
-    parser.add_argument("--sample", type=int, help="classify N sample articles")
-    parser.add_argument("--all", action="store_true", help="classify all articles (careful)")
+    parser.add_argument("--all", action="store_true", help="classify all articles")
     parser.add_argument("--model", type=str, default=DEFAULT_MODEL)
     parser.add_argument("--out", type=Path, default=TABLES_DIR / "llm_labels.csv")
-    parser.add_argument("--no-resume", action="store_true", help="reclassify rows even if output already has them")
     parser.add_argument("--workers", type=int, default=1, help="parallel API calls")
     args = parser.parse_args(argv[1:])
 
-    data, raw = load_data_for_classification()[:2]
+    data, _path = load_data_for_classification()
     arts = []
     try:
         from src.utilitarios.dados_noticias import article_records
 
-        arts = article_records(data, raw)
+        arts = article_records(data)
     except Exception:
         raise SystemExit("Cannot import article_records from src/utilitarios/dados_noticias.py")
 
-    if args.aid:
-        rec = find_article_by_aid(arts, args.aid)
-        if not rec:
-            print(f"not found: {args.aid}", file=sys.stderr)
-            return 1
-        candidates = [rec]
-    elif args.sample:
-        candidates = arts[: args.sample]
-    elif args.all:
+    # Filter: keep only articles containing the exact phrase "segurança presente"
+    original_count = len(arts)
+    arts = [r for r in arts if contains_exact_phrase(r, "seguranca presente")]
+    if len(arts) != original_count:
+        print(f"Filtered articles: {original_count} -> {len(arts)} (exact phrase 'segurança presente')", file=sys.stderr)
+
+    if args.all:
         candidates = arts
     else:
         parser.print_help()
         return 2
 
-    existing = {} if args.no_resume else read_existing_rows(args.out)
+    existing = read_existing_rows(args.out)
     rows_by_key = dict(existing)
     pending = []
     for rec in candidates:
         key = rec.get("recordKey") or rec["id"]
         if key in rows_by_key and rows_by_key[key].get("label") and rows_by_key[key].get("evento_chave"):
-            print(f"skip existing {key}", file=sys.stderr)
             continue
         pending.append(rec)
 

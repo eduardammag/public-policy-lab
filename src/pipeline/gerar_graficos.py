@@ -23,8 +23,7 @@ def load_labels(path: Path) -> pd.DataFrame:
     df["label"] = df["label"].fillna("n/a").str.strip().str.lower()
     df.loc[~df["label"].isin(SENTIMENT_ORDER), "label"] = "n/a"
     df["publishedAt"] = pd.to_datetime(df.get("publishedAt"), errors="coerce", utc=True)
-    df["date"] = df["publishedAt"].dt.date
-    df["month"] = df["publishedAt"].dt.to_period("M").astype(str)
+    df["month"] = df["publishedAt"].dt.tz_convert(None).dt.to_period("M").astype(str)
     if "grau_ambiguidade" in df.columns:
         df["grau_ambiguidade"] = (
             df["grau_ambiguidade"]

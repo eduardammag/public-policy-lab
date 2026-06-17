@@ -1,0 +1,32 @@
+\babel@toc {brazilian}{}\relax 
+\contentsline {section}{\numberline {1}Introdução}{3}{section.1}%
+\contentsline {section}{\numberline {2}Objetivos}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Objetivo geral}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Objetivos específicos}{3}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Dados}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Cobertura temporal}{4}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Tamanho da base}{4}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Pipeline implementada}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Preparação da entrada}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Fase 1: classificação LLM}{5}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Prompt único}{6}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Classes de sentimento}{7}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Grau de ambiguidade}{7}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Fase 2: gráficos e tabelas}{8}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Fase 3: ranking de eventos}{8}{subsection.4.7}%
+\contentsline {section}{\numberline {5}Deduplicação}{9}{section.5}%
+\contentsline {section}{\numberline {6}Resultados gerais de sentimento}{9}{section.6}%
+\contentsline {section}{\numberline {7}Ambiguidade da classificação}{10}{section.7}%
+\contentsline {section}{\numberline {8}Rankings de eventos}{10}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Eventos mais amados}{10}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Eventos mais odiados}{11}{subsection.8.2}%
+\contentsline {section}{\numberline {9}Gráficos produzidos}{11}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Distribuição geral}{12}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Evolução temporal}{13}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Ambiguidade e fontes}{14}{subsection.9.3}%
+\contentsline {section}{\numberline {10}Produtos finais gerados}{15}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Tabelas}{15}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Procedimento computacional}{16}{subsection.10.2}%
+\contentsline {section}{\numberline {11}Discussão}{16}{section.11}%
+\contentsline {section}{\numberline {12}Limitações}{16}{section.12}%
+\contentsline {section}{\numberline {13}Conclusão}{17}{section.13}%
