@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
-
+.aux
+.log
+.out
+.toc
+.
 .DS_Store
 Thumbs.db

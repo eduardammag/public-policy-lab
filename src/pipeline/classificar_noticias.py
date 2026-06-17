@@ -40,7 +40,6 @@ OUTPUT_FIELDS = [
     "targetKeys",
     "label",
     "sentiment_score",
-    "grau_ambiguidade",
     "reason",
     "evidencia_sentimento",
     "evento",
@@ -169,14 +168,6 @@ def normalize_label(label: str | None) -> str:
     return "n/a"
 
 
-def normalize_ambiguity(value: str | None) -> str:
-    value = (value or "").strip().lower()
-    value = value.replace("médio", "medio")
-    if value in {"baixo", "medio", "alto"}:
-        return value
-    return "alto"
-
-
 def classify_text(
     text: str,
     model: str = DEFAULT_MODEL,
@@ -195,7 +186,6 @@ def classify_text(
             if attempt == retries:
                 return {
                     "label": "n/a",
-                    "grau_ambiguidade": "alto",
                     "reason_sentimento": f"API error: {e}",
                 }
             retry_seconds = re.search(r"retry in ([0-9.]+)s|seconds:\s*(\d+)", str(e), re.IGNORECASE)
@@ -211,7 +201,6 @@ def classify_text(
     except Exception:
         return {
             "label": "n/a",
-            "grau_ambiguidade": "alto",
             "reason_sentimento": content or str(last_error or ""),
         }
 
@@ -240,7 +229,7 @@ def read_existing_rows(path: Path) -> dict[str, dict]:
 def write_labels_csv(rows: list[dict], outpath: Path) -> None:
     outpath.parent.mkdir(parents=True, exist_ok=True)
     with outpath.open("w", newline="", encoding="utf-8-sig") as f:
-        writer = csv.DictWriter(f, fieldnames=OUTPUT_FIELDS)
+        writer = csv.DictWriter(f, fieldnames=OUTPUT_FIELDS, extrasaction="ignore")
         writer.writeheader()
         for r in rows:
             writer.writerow(r)
@@ -248,7 +237,6 @@ def write_labels_csv(rows: list[dict], outpath: Path) -> None:
 
 def article_to_row(rec: dict, out: dict, model: str) -> dict:
     label = normalize_label(out.get("label"))
-    grau_ambiguidade = normalize_ambiguity(out.get("grau_ambiguidade"))
     reason = out.get("reason_sentimento") or out.get("reason") or ""
     event_name = str(out.get("evento") or out.get("evento_chave") or "").strip()
     event_key = str(out.get("evento_chave") or event_name or "").strip()
@@ -267,7 +255,6 @@ def article_to_row(rec: dict, out: dict, model: str) -> dict:
         "targetKeys": "; ".join(rec.get("targetKeys") or []),
         "label": label,
         "sentiment_score": SCORE_MAP[label],
-        "grau_ambiguidade": grau_ambiguidade,
         "reason": str(reason)[:1200],
         "evidencia_sentimento": str(out.get("evidencia_sentimento", ""))[:1200],
         "evento": event_name,

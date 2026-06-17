@@ -1,17 +1,77 @@
 from __future__ import annotations
 import argparse
 from pathlib import Path
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 from src.configuracoes.config import GRAPHS_DIR, SENTIMENT_ORDER, TABLES_DIR
 
+TIME_PLOT_START = pd.Timestamp("2018-01-01")
+
 PALETTE = {
-    "muito negativo": "#8b1e3f",
+    "muito negativo": "#8b0000",
     "negativo": "#d1495b",
     "neutro": "#7f8c8d",
     "positivo": "#2a9d8f",
     "muito positivo": "#1d6f42",
-    "n/a": "#c8c8c8",}
+    "n/a": "#c8c8c8",
+}
+
+LINE_PALETTE = {
+    "muito negativo": "#d00022",
+    "negativo": "#ff7f2a",
+    "positivo": "#42b6ff",
+    "muito positivo": "#2ca62d",
+}
+
+LABELS_PT = {
+    "muito negativo": "Muito negativo",
+    "negativo": "Negativo",
+    "neutro": "Neutro",
+    "positivo": "Positivo",
+    "muito positivo": "Muito positivo",
+    "n/a": "Não aplicável",
+}
+
+
+def apply_plot_style() -> None:
+    plt.rcParams.update(
+        {
+            "figure.facecolor": "white",
+            "axes.facecolor": "white",
+            "axes.edgecolor": "#333333",
+            "axes.labelcolor": "#222222",
+            "axes.titlecolor": "#111111",
+            "axes.titlesize": 22,
+            "axes.labelsize": 18,
+            "xtick.labelsize": 15,
+            "ytick.labelsize": 15,
+            "legend.fontsize": 15,
+            "legend.title_fontsize": 15,
+            "font.size": 16,
+            "grid.color": "#d8d8d8",
+            "grid.linewidth": 0.8,
+            "savefig.facecolor": "white",
+            "savefig.bbox": "tight",
+        }
+    )
+
+
+def format_time_axis(ax) -> None:
+    ax.xaxis.set_major_locator(mdates.YearLocator(base=1))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    ax.tick_params(axis="x", rotation=0)
+    ax.margins(x=0.01)
+
+
+def filter_time_index_from_2018(data: pd.DataFrame | pd.Series) -> pd.DataFrame | pd.Series:
+    dates = pd.to_datetime(data.index, errors="coerce")
+    return data.loc[dates >= TIME_PLOT_START]
+
+
+def add_bar_labels(ax, padding: int = 3) -> None:
+    for container in ax.containers:
+        ax.bar_label(container, padding=padding, fontsize=14, color="#222222")
 
 
 def load_labels(path: Path) -> pd.DataFrame:
@@ -24,18 +84,6 @@ def load_labels(path: Path) -> pd.DataFrame:
     df.loc[~df["label"].isin(SENTIMENT_ORDER), "label"] = "n/a"
     df["publishedAt"] = pd.to_datetime(df.get("publishedAt"), errors="coerce", utc=True)
     df["month"] = df["publishedAt"].dt.tz_convert(None).dt.to_period("M").astype(str)
-    if "grau_ambiguidade" in df.columns:
-        df["grau_ambiguidade"] = (
-            df["grau_ambiguidade"]
-            .fillna("")
-            .astype(str)
-            .str.strip()
-            .str.lower()
-            .str.replace("médio", "medio", regex=False)
-        )
-        df.loc[~df["grau_ambiguidade"].isin(["baixo", "medio", "alto"]), "grau_ambiguidade"] = ""
-    else:
-        df["grau_ambiguidade"] = ""
     if "articleId" in df.columns:
         df["articleId"] = pd.to_numeric(df["articleId"], errors="coerce")
         df = (
@@ -74,73 +122,81 @@ def save_label_counts(df: pd.DataFrame, tables_dir: Path) -> tuple[pd.DataFrame,
 
 
 def line_percent(monthly_pct: pd.DataFrame, graphs_dir: Path) -> None:
-    fig, ax = plt.subplots(figsize=(14, 7))
+    monthly_pct = filter_time_index_from_2018(monthly_pct)
+    fig, ax = plt.subplots(figsize=(15, 8))
     x = pd.to_datetime(monthly_pct.index)
-    for label in SENTIMENT_ORDER:
-        ax.plot(x, monthly_pct[label], marker="o", linewidth=2, label=label, color=PALETTE[label])
-    ax.set_title("Percentual mensal de noticias por sentimento")
-    ax.set_xlabel("Mes")
-    ax.set_ylabel("% das noticias")
+    line_labels = [label for label in SENTIMENT_ORDER if label not in {"neutro", "n/a"}]
+    for label in line_labels:
+        ax.plot(
+            x,
+            monthly_pct[label],
+            linewidth=2.4,
+            label=LABELS_PT[label],
+            color=LINE_PALETTE[label],
+        )
+    ax.set_title("Evolução mensal da distribuição de sentimentos", pad=16, fontweight="bold")
+    ax.set_xlabel("Ano de publicação")
+    ax.set_ylabel("Participação nas notícias (%)")
     ax.set_ylim(0, 100)
-    ax.grid(True, alpha=0.25)
-    ax.legend(ncol=3)
-    fig.autofmt_xdate()
+    ax.spines[["top", "right"]].set_visible(False)
+    format_time_axis(ax)
+    ax.legend(
+        ncol=2,
+        frameon=True,
+        facecolor="white",
+        edgecolor="#dddddd",
+        framealpha=0.94,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.16),
+    )
     fig.tight_layout()
     fig.savefig(graphs_dir / "linha_percentual_mensal_sentimentos.png", dpi=180)
     plt.close(fig)
 
 
 def stacked_area(monthly_pct: pd.DataFrame, graphs_dir: Path) -> None:
-    fig, ax = plt.subplots(figsize=(14, 7))
+    monthly_pct = filter_time_index_from_2018(monthly_pct)
+    fig, ax = plt.subplots(figsize=(15, 8))
     x = pd.to_datetime(monthly_pct.index)
     ax.stackplot(
         x,
         [monthly_pct[label] for label in SENTIMENT_ORDER],
-        labels=SENTIMENT_ORDER,
+        labels=[LABELS_PT[label] for label in SENTIMENT_ORDER],
         colors=[PALETTE[label] for label in SENTIMENT_ORDER],
-        alpha=0.85,
+        alpha=0.9,
     )
-    ax.set_title("Composicao mensal dos sentimentos")
-    ax.set_xlabel("Mes")
-    ax.set_ylabel("% das noticias")
+    ax.set_title("Composição mensal da cobertura por sentimento", pad=16, fontweight="bold")
+    ax.set_xlabel("Ano de publicação")
+    ax.set_ylabel("Participação nas notícias (%)")
     ax.set_ylim(0, 100)
-    ax.legend(ncol=3, loc="upper left")
-    fig.autofmt_xdate()
+    ax.spines[["top", "right"]].set_visible(False)
+    format_time_axis(ax)
+    ax.legend(
+        ncol=3,
+        frameon=True,
+        facecolor="white",
+        edgecolor="#dddddd",
+        framealpha=0.94,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.16),
+    )
     fig.tight_layout()
     fig.savefig(graphs_dir / "area_empilhada_percentual_mensal.png", dpi=180)
     plt.close(fig)
 
 
 def bar_counts(counts: pd.DataFrame, graphs_dir: Path) -> None:
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.bar(counts["label"], counts["n_articles"], color=[PALETTE[label] for label in counts["label"]])
-    ax.set_title("Quantidade de noticias por sentimento")
+    fig, ax = plt.subplots(figsize=(12, 7))
+    labels = [LABELS_PT[label] for label in counts["label"]]
+    ax.bar(labels, counts["n_articles"], color=[PALETTE[label] for label in counts["label"]], width=0.68)
+    ax.set_title("Distribuição geral das notícias por sentimento", pad=16, fontweight="bold")
     ax.set_xlabel("Sentimento")
-    ax.set_ylabel("Noticias")
-    ax.tick_params(axis="x", rotation=25)
+    ax.set_ylabel("Número de notícias")
+    ax.tick_params(axis="x", rotation=0)
+    ax.spines[["top", "right"]].set_visible(False)
+    add_bar_labels(ax)
     fig.tight_layout()
     fig.savefig(graphs_dir / "barras_quantidade_por_sentimento.png", dpi=180)
-    plt.close(fig)
-
-
-def ambiguity_chart(df: pd.DataFrame, graphs_dir: Path, tables_dir: Path) -> None:
-    valid = df[df["grau_ambiguidade"].isin(["baixo", "medio", "alto"])]
-    if valid.empty:
-        return
-    order = ["baixo", "medio", "alto"]
-    counts = valid["grau_ambiguidade"].value_counts().reindex(order, fill_value=0)
-    counts.rename_axis("grau_ambiguidade").reset_index(name="n_articles").to_csv(
-        tables_dir / "ambiguity_counts.csv",
-        index=False,
-        encoding="utf-8-sig",
-    )
-    fig, ax = plt.subplots(figsize=(9, 5))
-    ax.bar(order, counts.values, color=["#2a9d8f", "#e9c46a", "#e76f51"])
-    ax.set_title("Grau de ambiguidade da classificacao")
-    ax.set_xlabel("Grau de ambiguidade")
-    ax.set_ylabel("Noticias")
-    fig.tight_layout()
-    fig.savefig(graphs_dir / "barras_grau_ambiguidade.png", dpi=180)
     plt.close(fig)
 
 
@@ -148,12 +204,15 @@ def score_histogram(df: pd.DataFrame, graphs_dir: Path) -> None:
     valid = df.dropna(subset=["sentiment_score"]).copy()
     valid["sentiment_score"] = pd.to_numeric(valid["sentiment_score"], errors="coerce")
     valid = valid.dropna(subset=["sentiment_score"])
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(11, 6.5))
     ax.hist(valid["sentiment_score"], bins=[-2.5, -1.5, -0.5, 0.5, 1.5, 2.5], color="#6c757d", edgecolor="white")
-    ax.set_title("Histograma do escore de sentimento")
-    ax.set_xlabel("Escore (-2 a 2)")
-    ax.set_ylabel("Noticias")
+    ax.set_title("Distribuição do escore de sentimento", pad=16, fontweight="bold")
+    ax.set_xlabel("Escore de sentimento")
+    ax.set_ylabel("Número de notícias")
     ax.set_xticks([-2, -1, 0, 1, 2])
+    ax.set_xticklabels(["-2\nMuito negativo", "-1\nNegativo", "0\nNeutro", "1\nPositivo", "2\nMuito positivo"])
+    ax.tick_params(axis="x", rotation=0)
+    ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
     fig.savefig(graphs_dir / "histograma_escore_sentimento.png", dpi=180)
     plt.close(fig)
@@ -161,13 +220,14 @@ def score_histogram(df: pd.DataFrame, graphs_dir: Path) -> None:
 
 def volume_line(df: pd.DataFrame, graphs_dir: Path) -> None:
     monthly_volume = df.dropna(subset=["publishedAt"]).groupby("month").size().sort_index()
-    fig, ax = plt.subplots(figsize=(14, 6))
-    ax.plot(pd.to_datetime(monthly_volume.index), monthly_volume.values, marker="o", color="#264653")
-    ax.set_title("Volume mensal de noticias classificadas")
-    ax.set_xlabel("Mes")
-    ax.set_ylabel("Noticias")
-    ax.grid(True, alpha=0.25)
-    fig.autofmt_xdate()
+    monthly_volume = filter_time_index_from_2018(monthly_volume)
+    fig, ax = plt.subplots(figsize=(15, 7))
+    ax.plot(pd.to_datetime(monthly_volume.index), monthly_volume.values, marker="o", markersize=4.5, linewidth=2.4, color="#264653")
+    ax.set_title("Volume mensal de notícias analisadas", pad=16, fontweight="bold")
+    ax.set_xlabel("Ano de publicação")
+    ax.set_ylabel("Número de notícias")
+    ax.spines[["top", "right"]].set_visible(False)
+    format_time_axis(ax)
     fig.tight_layout()
     fig.savefig(graphs_dir / "linha_volume_mensal_noticias.png", dpi=180)
     plt.close(fig)
@@ -178,13 +238,21 @@ def source_chart(df: pd.DataFrame, graphs_dir: Path, tables_dir: Path) -> None:
     source_counts["total"] = source_counts.sum(axis=1)
     top = source_counts.sort_values("total", ascending=False).head(12).drop(columns=["total"])
     top.to_csv(tables_dir / "top_sources_sentiment_counts.csv", encoding="utf-8-sig")
-    fig, ax = plt.subplots(figsize=(13, 7))
-    top.plot(kind="bar", stacked=True, ax=ax, color=[PALETTE[label] for label in SENTIMENT_ORDER])
-    ax.set_title("Sentimentos por fonte - top 12")
-    ax.set_xlabel("Fonte")
-    ax.set_ylabel("Noticias")
-    ax.tick_params(axis="x", rotation=35)
-    ax.legend(ncol=3)
+    fig, ax = plt.subplots(figsize=(13, 8))
+    top = top.iloc[::-1]
+    top.rename(columns=LABELS_PT).plot(kind="barh", stacked=True, ax=ax, color=[PALETTE[label] for label in SENTIMENT_ORDER], width=0.72)
+    ax.set_title("Distribuição de sentimentos nas principais fontes", pad=16, fontweight="bold")
+    ax.set_xlabel("Número de notícias")
+    ax.set_ylabel("Fonte de publicação")
+    ax.tick_params(axis="y", rotation=0)
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.legend(
+        ncol=3,
+        frameon=False,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.10),
+        title="Sentimento",
+    )
     fig.tight_layout()
     fig.savefig(graphs_dir / "barras_empilhadas_top_fontes.png", dpi=180)
     plt.close(fig)
@@ -200,14 +268,47 @@ def main() -> int:
     args.tables_dir.mkdir(parents=True, exist_ok=True)
     args.graphs_dir.mkdir(parents=True, exist_ok=True)
 
+    apply_plot_style()
+
     df = load_labels(args.labels)
-    df.to_csv(args.tables_dir / "noticias_classificadas.csv", index=False, encoding="utf-8-sig")
+    article_columns = [
+        "recordKey",
+        "jsonIndex",
+        "id",
+        "articleId",
+        "publishedAt",
+        "publishedDisplay",
+        "sourceName",
+        "sourceHost",
+        "title",
+        "storyId",
+        "storyTitle",
+        "targetKeys",
+        "label",
+        "sentiment_score",
+        "reason",
+        "evidencia_sentimento",
+        "evento",
+        "evento_chave",
+        "evento_id",
+        "tipo_evento",
+        "local",
+        "data_evento",
+        "descricao_curta",
+        "evidencia_evento",
+        "model",
+        "month",
+    ]
+    df[[col for col in article_columns if col in df.columns]].to_csv(
+        args.tables_dir / "noticias_classificadas.csv",
+        index=False,
+        encoding="utf-8-sig",
+    )
     counts, monthly_pct = save_label_counts(df, args.tables_dir)
 
     line_percent(monthly_pct, args.graphs_dir)
     stacked_area(monthly_pct, args.graphs_dir)
     bar_counts(counts, args.graphs_dir)
-    ambiguity_chart(df, args.graphs_dir, args.tables_dir)
     score_histogram(df, args.graphs_dir)
     volume_line(df, args.graphs_dir)
     source_chart(df, args.graphs_dir, args.tables_dir)

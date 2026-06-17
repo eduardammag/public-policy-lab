@@ -40,7 +40,6 @@ ARTICLE_FIELDS = [
     "title",
     "label",
     "sentiment_score",
-    "grau_ambiguidade",
     *EVENT_COLUMNS,
     "model",
 ]
@@ -56,11 +55,6 @@ def slugify(text: str) -> str:
 def normalize_label(label: str) -> str:
     label = str(label or "").strip().lower()
     return label if label in SENTIMENT_ORDER else "n/a"
-
-
-def normalize_ambiguity(value: str) -> str:
-    value = str(value or "").strip().lower().replace("médio", "medio")
-    return value if value in {"baixo", "medio", "alto"} else ""
 
 
 def load_unified_labels(path: Path) -> pd.DataFrame:
@@ -85,10 +79,6 @@ def load_unified_labels(path: Path) -> pd.DataFrame:
         df["sentiment_score"] = pd.NA
     fallback_score = df["label"].map(SCORE_MAP)
     df["sentiment_score"] = df["sentiment_score"].fillna(fallback_score)
-    if "grau_ambiguidade" in df.columns:
-        df["grau_ambiguidade"] = df["grau_ambiguidade"].map(normalize_ambiguity)
-    else:
-        df["grau_ambiguidade"] = ""
     df["evento"] = df["evento"].where(df["evento"].astype(str).str.len() > 0, df["evento_chave"])
     df["evento_id"] = df["evento_id"].where(df["evento_id"].astype(str).str.len() > 0, df["evento_chave"].map(slugify))
     return (
@@ -117,11 +107,6 @@ def aggregate_events(events: pd.DataFrame, min_articles: int) -> pd.DataFrame:
         score_series = pd.to_numeric(group["sentiment_score"], errors="coerce")
         score_mean = score_series.mean()
         classified_n = int(score_series.notna().sum())
-        ambiguity_counts = (
-            group["grau_ambiguidade"].value_counts().to_dict()
-            if "grau_ambiguidade" in group
-            else {}
-        )
         rows.append(
             {
                 "evento_id": event_id,
@@ -145,10 +130,6 @@ def aggregate_events(events: pd.DataFrame, min_articles: int) -> pd.DataFrame:
                 "share_negativo": round(negative_n / n, 4),
                 "proporcao_positivas": round(positive_n / n, 4),
                 "proporcao_negativas": round(negative_n / n, 4),
-                "ambiguidade_baixa": ambiguity_counts.get("baixo", 0),
-                "ambiguidade_media": ambiguity_counts.get("medio", 0),
-                "ambiguidade_alta": ambiguity_counts.get("alto", 0),
-                "proporcao_ambiguidade_alta": round(ambiguity_counts.get("alto", 0) / n, 4),
                 "peso_positivo": positive_weight,
                 "peso_negativo": negative_weight,
                 "titulos_exemplo": " | ".join(group["title"].head(5).astype(str)),
@@ -176,6 +157,7 @@ def write_rankings(
         ["score_medio", "share_negativo", "peso_negativo", "n_artigos"],
         ascending=[True, False, False, False],
     )
+    hated = hated[hated["n_negativas"] > 0].copy()
     summary_all.to_csv(tables_dir / "eventos_resumo.csv", index=False, encoding="utf-8-sig")
     loved.to_csv(tables_dir / "eventos_mais_amados.csv", index=False, encoding="utf-8-sig")
     hated.to_csv(tables_dir / "eventos_mais_odiados.csv", index=False, encoding="utf-8-sig")
@@ -192,7 +174,6 @@ def build_markdown(events: pd.DataFrame, loved: pd.DataFrame, hated: pd.DataFram
         f"- Noticias unicas analisadas: **{len(events)}**",
         f"- Criterio do ranking principal: eventos com pelo menos **{min_articles}** noticia(s).",
         "- `score_medio` usa: muito negativo=-2, negativo=-1, neutro=0, positivo=1, muito positivo=2; n/a fica fora da media.",
-        "- `grau_ambiguidade` resume a incerteza da classificacao como baixo, medio ou alto.",
         "- Desempates usam proporcao de positivas/negativas, peso dos extremos e quantidade de noticias.",
         "",
         "## Eventos Mais Amados",
